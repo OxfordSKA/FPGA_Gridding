@@ -37,7 +37,8 @@
 #include "write_fits_cube.h"
 
 #include <CL/opencl.h>
-#include "CL/aocl_utils.h"
+//#include "AOCL_UTILS/opencl.h"
+#include "AOCL_UTILS/aocl_utils.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -59,6 +60,10 @@
 
 // For compiling OpenCL from source
 #define MAX_SOURCE_SIZE (0x100000)
+
+using namespace aocl_utils;
+
+void cleanup();
 
 int main(int argc, char** argv)
 {
@@ -253,13 +258,19 @@ int main(int argc, char** argv)
     printf("ERROR: Unable to find Intel(R) FPGA OpenCL platform.\n");
     return false;
   }
+  // Query the available OpenCL devices.
+  scoped_array<cl_device_id> devices;
 
-  // Query the available OpenCL device.
-  device.reset(getDevices(platform, CL_DEVICE_TYPE_ALL, &num_devices));
+  devices.reset(getDevices(platform, CL_DEVICE_TYPE_ALL, &num_devices));
+
+  // We'll just use the first device.
+  device = devices[0];
+  
+
   printf("Platform: %s\n", getPlatformName(platform).c_str());
   printf("Using %d device(s)\n", num_devices);
   for(unsigned i = 0; i < num_devices; ++i) {
-    printf("  %s\n", getDeviceName(device[i]).c_str());
+    printf("  %s\n", getDeviceName(devices[i]).c_str());
   }
 
 
@@ -341,12 +352,9 @@ int main(int argc, char** argv)
     status = clEnqueueWriteBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
                         num_cells* sizeof(float), vis_grid_new, 0, NULL, NULL);
     
-    program = clCreateProgramWithSource(context, 1, 
-        (const char **)&source_str, (const size_t *)&source_size, &status);
-
-     std::string binary_file = getBoardBinaryFile("gridding_kernels", device[0]);
+     std::string binary_file = getBoardBinaryFile("gridding_kernels", device);
      printf("Using AOCX: %s\n", binary_file.c_str());
-     program = createProgramFromBinary(context, binary_file.c_str(), device, 1); 
+     program = createProgramFromBinary(context, binary_file.c_str(), &device, 1); 
 
 
     //status = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
@@ -381,6 +389,7 @@ int main(int argc, char** argv)
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_new);
 
+	printf("finished init opencl\n");
     /*===================================================================*/
     /* End init OpenCL */
     /*===================================================================*/
@@ -443,7 +452,7 @@ int main(int argc, char** argv)
         // Execute the OpenCL kernel on the list
         size_t global_item_size = 1; 
         size_t local_item_size = 1; 
-        status = clEnqueueTaskKernel(queue, kernel, 0, NULL);
+        status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
 	status = clFinish(queue);
         printf("status: %d\n", status);
         /*
@@ -579,7 +588,18 @@ int main(int argc, char** argv)
     free(vis_grid_orig);
     free(vis_grid_new);
     free(weights_grid);
-
+  if(kernel) {
+    clReleaseKernel(kernel);
+  }
+  if(program) {
+    clReleaseProgram(program);
+  }
+  if(queue) {
+    clReleaseCommandQueue(queue);
+  }
+  if(context) {
+    clReleaseContext(context);
+  }
     /* Report timing. */
     printf("Gridding visibilities took %.3f seconds (original version)\n",
             oskar_timer_elapsed(tmr_grid_vis_orig));
@@ -590,4 +610,9 @@ int main(int argc, char** argv)
     oskar_timer_free(tmr_grid_vis_orig);
     oskar_timer_free(tmr_grid_vis_new);
     return 0;
+}
+
+// Free the resources allocated during initialization
+void cleanup() {
+
 }

@@ -40,6 +40,7 @@ __kernel void oskar_grid_wproj_cl(
     int num_skipped = 0;
     for (i = 0; i < num_points; ++i)
     {
+    	if (i%1000 == 0) printf("i: %d\n", i);
         double sum = 0.0;
         int j, k;
 

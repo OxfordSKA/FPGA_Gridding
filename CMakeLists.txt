@@ -17,15 +17,15 @@ find_package(Threads REQUIRED)
 find_package(OpenCL REQUIRED)
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
-set(AOCL_COMPILE_CONFIG )
-set(AOCL_LINK_CONFIG ****)
+set(AOCL_COMPILE_CONFIG "-I/opt/intelFPGA_pro/17.1/hld/host/include")
+set(AOCL_LINK_CONFIG "-L/opt/intelFPGA_pro/17.1/hld/board/a10_ref/linux64/lib -L/opt/intelFPGA_pro/17.1/hld/host/linux64/lib -Wl,--no-as-needed -lalteracl -laltera_a10_ref_mmd -lelf")
 
 #! Compiler flags.
 if ("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*"
             OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     # Enable all warnings.
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wextra")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra  ${AOCL_COMPILE_CONFIG} ${AOCL_LINK_CONFIG}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fPIC ${AOCL_COMPILE_CONFIG} ${AOCL_LINK_CONFIG}")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
@@ -49,6 +49,7 @@ add_subdirectory(utils/binary)
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/utils)
 include_directories(${PROJECT_SOURCE_DIR}/cfitsio-3.41)
+include_directories(${PROJECT_SOURCE_DIR}/AOCL_UTILS)
 set(read_vis_SRC
     # List of source files to compile.
     utils/check_value.c
@@ -58,11 +59,11 @@ set(read_vis_SRC
     utils/read_kernel.c
     utils/read_vis.c
     utils/write_fits_cube.c
-    gpu_support.cu
     oskar_grid_wproj.c
     main.cpp
-    CL/aocl_utils.cpp
+    AOCL_UTILS/opencl.cpp
+    AOCL_UTILS/options.cpp
 )
 add_executable(main ${read_vis_SRC})
 
-target_link_libraries(main cfitsio oskar_binary m Threads::Threads OpenCL)
+target_link_libraries(main cfitsio oskar_binary m Threads::Threads)
