@@ -50,7 +50,7 @@
 /* Set this to 1 if calling a new version of the gridding function. */
 #define HAVE_NEW_VERSION 1
 #define WRITE_GRID 0
-#define WRITE_DIFF_GRID 1
+#define WRITE_DIFF_GRID 0
 /*===================================================================*/
 /*===================================================================*/
 
@@ -287,6 +287,7 @@ int main(int argc, char** argv)
     context = clCreateContext( NULL, 1, &device, NULL, NULL, &status);
     queue = clCreateCommandQueue(context, device, 0, &status);
 
+	num_times_baselines = 100000;
     int block_size = num_times_baselines;
 
     // create openCL mem buffers for each data structure and copy to device
@@ -304,7 +305,7 @@ int main(int argc, char** argv)
     num_cells = 2*conv_size_half * conv_size_half * num_w_planes;
     cl_mem d_kernels = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    status = posix_memalign((void**) &kernels, 64, num_cells *sizeof(float));
+    //status = posix_memalign((void**) &kernels, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_kernels, CL_TRUE, 0,
                         num_cells* sizeof(float), kernels, 0, NULL, NULL);
 
@@ -313,33 +314,30 @@ int main(int argc, char** argv)
     num_cells = num_times_baselines;
     cl_mem d_uu = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    status = posix_memalign((void**) &uu, 64, num_cells *sizeof(float));
-    status = clEnqueueWriteBuffer(queue, d_uu, CL_TRUE, 0,
-                        num_cells* sizeof(float), (float*) uu, 0, NULL, NULL);
+    //status = posix_memalign((void**) &uu, 64, num_cells *sizeof(float));
+
     cl_mem d_vv = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    status = posix_memalign((void**) &vv, 64, num_cells *sizeof(float));
-    status = clEnqueueWriteBuffer(queue, d_vv, CL_TRUE, 0,
-                        num_cells* sizeof(float), (float*) vv, 0, NULL, NULL);
+    //status = posix_memalign((void**) &vv, 64, num_cells *sizeof(float));
+
     cl_mem d_ww = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    status = posix_memalign((void**) &ww, 64, num_cells *sizeof(float));
-    status = clEnqueueWriteBuffer(queue, d_ww, CL_TRUE, 0,
-                        num_cells* sizeof(float), ww, 0, NULL, NULL);
+    //status = posix_memalign((void**) &ww, 64, num_cells *sizeof(float));
+    printf("W!!!! %f\n", ((float*) ww)[100]);
+
 
     num_cells = 2*num_times_baselines;
     cl_mem d_vis_block = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    status = posix_memalign((void**) &vis_block, 64, num_cells *sizeof(float));
-    status = clEnqueueWriteBuffer(queue, d_vis_block, CL_TRUE, 0,
-                        num_cells* sizeof(float), vis_block, 0, NULL, NULL);
+    //status = posix_memalign((void**) &vis_block, 64, num_cells *sizeof(float));
+
+    
 
     num_cells = num_times_baselines;
     cl_mem d_weight = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    status = posix_memalign((void**) &weight, 64, num_cells *sizeof(float));
-    status = clEnqueueWriteBuffer(queue, d_weight, CL_TRUE, 0,
-                        num_cells* sizeof(float), weight, 0, NULL, NULL);
+    //status = posix_memalign((void**) &weight, 64, num_cells *sizeof(float));
+    
 
     cl_float d_cellsize_rad = cellsize_rad;
     cl_float d_w_scale = w_scale;
@@ -348,7 +346,7 @@ int main(int argc, char** argv)
     num_cells = 2*grid_size*grid_size;
     cl_mem d_vis_grid_new = clCreateBuffer(context, CL_MEM_READ_WRITE, 
             num_cells * sizeof(float), NULL, &status);
-    status = posix_memalign((void**) &vis_grid_new, 64, num_cells *sizeof(float));
+   // status = posix_memalign((void**) &vis_grid_new, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
                         num_cells* sizeof(float), vis_grid_new, 0, NULL, NULL);
     
@@ -412,7 +410,7 @@ int main(int argc, char** argv)
                 OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE, i,
                 INT*6, dim_start_and_size, &status);
         const int num_times = dim_start_and_size[2];
-        int block_size = num_times * num_baselines;
+        //int block_size = num_times * num_baselines;
 
         /* Read the visibility data. */
         oskar_binary_read(h, vis_type,
@@ -440,6 +438,27 @@ int main(int argc, char** argv)
 
         /* Update new visibility grid. */
         oskar_timer_resume(tmr_grid_vis_new);
+        
+            printf("VIS: %.15f\n", ((float*)vis_block)[100]);
+        
+        num_cells = num_times_baselines;
+    	status = clEnqueueWriteBuffer(queue, d_uu, CL_TRUE, 0,
+   			num_cells* sizeof(float), (float*) uu, 0, NULL, NULL);
+   			
+        status = clEnqueueWriteBuffer(queue, d_vv, CL_TRUE, 0,
+        	num_cells* sizeof(float), (float*) vv, 0, NULL, NULL);
+                
+        status = clEnqueueWriteBuffer(queue, d_ww, CL_TRUE, 0,
+   			 num_cells* sizeof(float), ww, 0, NULL, NULL);
+                
+        num_cells = 2*num_times_baselines;
+        status = clEnqueueWriteBuffer(queue, d_vis_block, CL_TRUE, 0,
+        	num_cells* sizeof(float), vis_block, 0, NULL, NULL);
+         
+         num_cells = num_times_baselines;
+         status = clEnqueueWriteBuffer(queue, d_weight, CL_TRUE, 0,
+        	num_cells* sizeof(float), weight, 0, NULL, NULL);
+                
         /*===================================================================*/
         /*===================================================================*/
         /* CALL THE REPLACEMENT GRIDDING FUNCTION HERE. */

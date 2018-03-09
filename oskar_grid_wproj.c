@@ -153,6 +153,7 @@ void oskar_grid_wproj_f(
     *num_skipped = 0;
     for (i = 0; i < num_points; ++i)
     {
+    	if ((i%1000)==0) printf("i: %d\n", i);
         /*
         //if ((i%130816)!=120776) continue;
         if ((i%130816)!=109571) continue;

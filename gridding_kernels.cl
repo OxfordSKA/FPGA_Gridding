@@ -40,7 +40,7 @@ __kernel void oskar_grid_wproj_cl(
     int num_skipped = 0;
     for (i = 0; i < num_points; ++i)
     {
-    	if (i%1000 == 0) printf("i: %d\n", i);
+    	if ((i%1000) == 0) printf("i: %d\n", i);
         double sum = 0.0;
         int j, k;
 
@@ -50,6 +50,7 @@ __kernel void oskar_grid_wproj_cl(
         const float ww_i = ww[i];
         const float conv_conj = (ww_i > 0.0f) ? -1.0f : 1.0f;
         const int grid_w = (int)round(sqrt(fabs(ww_i * w_scale)));
+        //printf("grid_w: %d, ww_i %f\n", grid_w, ww_i);
         //const int grid_w = 2;
         const int grid_u = (int)round(pos_u) + grid_centre;
         const int grid_v = (int)round(pos_v) + grid_centre;
@@ -109,6 +110,7 @@ __kernel void oskar_grid_wproj_cl(
                 p = (p1 + k) << 1;
                 grid[p]     += (v_re * c_re - v_im * c_im);
                 grid[p + 1] += (v_im * c_re + v_re * c_im);
+               // if (c_re>0) printf("grid: %.15f %.15f\n", grid[p], v_re * c_re - v_im * c_im);
                 sum += c_re; /* Real part only. */
             }
                                                                 }
