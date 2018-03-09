@@ -1,0 +1,9 @@
+* Chose USE_TEXTURE=0 and removed references to texture
+* Chose MODE=MODE_SIMPLE and removed references to mode
+* To start, are using first option in run.gpu with c=32
+* changed doCuda to oskar_grid_wproj_f_gpu
+* hard coded defines into CMakeLists for now
++ rather than hard coding visibility values, read them in from input
+* read UVW coordinates in from data reader, changed scaling of uvw coordinates
+ to correctly map to grid coordinates used in moving window code
+* removed hard coded 4 polarisations from convolve 
