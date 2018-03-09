@@ -17,12 +17,15 @@ find_package(Threads REQUIRED)
 find_package(OpenCL REQUIRED)
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
+set(AOCL_COMPILE_CONFIG )
+set(AOCL_LINK_CONFIG ****)
+
 #! Compiler flags.
 if ("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*"
             OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     # Enable all warnings.
     set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -Wall -Wextra")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra  ${AOCL_COMPILE_CONFIG} ${AOCL_LINK_CONFIG}")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
@@ -58,6 +61,7 @@ set(read_vis_SRC
     gpu_support.cu
     oskar_grid_wproj.c
     main.cpp
+    CL/aocl_utils.cpp
 )
 add_executable(main ${read_vis_SRC})
 

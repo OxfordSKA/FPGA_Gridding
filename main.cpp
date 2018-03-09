@@ -36,8 +36,8 @@
 #include "read_vis.h"
 #include "write_fits_cube.h"
 
-#include <CL/cl.h>
-#include <CL/cl_platform.h>
+#include <CL/opencl.h>
+#include "CL/aocl_utils.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -235,20 +235,6 @@ int main(int argc, char** argv)
     /*===================================================================*/
     /* Init OpenCL */
     /*===================================================================*/
-    // Load the kernel source code into the array source_str
-    FILE *fp;
-    char *source_str;
-    size_t source_size;
- 
-    fp = fopen("../kernel_code.cl", "r");
-    if (!fp) {
-        fprintf(stderr, "Failed to load kernel.\n");
-        exit(1);
-    }
-    source_str = (char*)malloc(MAX_SOURCE_SIZE);
-    source_size = fread( source_str, 1, MAX_SOURCE_SIZE, fp);
-    fclose( fp );
-
     // OpenCL runtime configuration
     static cl_platform_id platform = NULL;
     static cl_device_id device = NULL;
@@ -260,6 +246,24 @@ int main(int argc, char** argv)
     cl_int cl_status;
     size_t valueSize;
     cl_uint num_platforms, num_devices;
+
+// Get the OpenCL platform.
+  platform = findPlatform("Intel");
+  if(platform == NULL) {
+    printf("ERROR: Unable to find Intel(R) FPGA OpenCL platform.\n");
+    return false;
+  }
+
+  // Query the available OpenCL device.
+  device.reset(getDevices(platform, CL_DEVICE_TYPE_ALL, &num_devices));
+  printf("Platform: %s\n", getPlatformName(platform).c_str());
+  printf("Using %d device(s)\n", num_devices);
+  for(unsigned i = 0; i < num_devices; ++i) {
+    printf("  %s\n", getDeviceName(device[i]).c_str());
+  }
+
+
+
     status = clGetPlatformIDs(1, &platform, &num_platforms);
     printf("NUM PLATFORMS %d \n", num_platforms);
     status = clGetDeviceIDs( platform, CL_DEVICE_TYPE_DEFAULT, 1, 
@@ -289,7 +293,7 @@ int main(int argc, char** argv)
     num_cells = 2*conv_size_half * conv_size_half * num_w_planes;
     cl_mem d_kernels = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    status = posix_memalign((void**) &kernels, 64, 
+    status = posix_memalign((void**) &kernels, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_kernels, CL_TRUE, 0,
                         num_cells* sizeof(float), kernels, 0, NULL, NULL);
 
@@ -298,26 +302,31 @@ int main(int argc, char** argv)
     num_cells = num_times_baselines;
     cl_mem d_uu = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
+    status = posix_memalign((void**) &uu, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_uu, CL_TRUE, 0,
                         num_cells* sizeof(float), (float*) uu, 0, NULL, NULL);
     cl_mem d_vv = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
+    status = posix_memalign((void**) &vv, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_vv, CL_TRUE, 0,
                         num_cells* sizeof(float), (float*) vv, 0, NULL, NULL);
     cl_mem d_ww = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
+    status = posix_memalign((void**) &ww, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_ww, CL_TRUE, 0,
                         num_cells* sizeof(float), ww, 0, NULL, NULL);
 
     num_cells = 2*num_times_baselines;
     cl_mem d_vis_block = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
+    status = posix_memalign((void**) &vis_block, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_vis_block, CL_TRUE, 0,
                         num_cells* sizeof(float), vis_block, 0, NULL, NULL);
 
     num_cells = num_times_baselines;
     cl_mem d_weight = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
+    status = posix_memalign((void**) &weight, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_weight, CL_TRUE, 0,
                         num_cells* sizeof(float), weight, 0, NULL, NULL);
 
@@ -328,13 +337,21 @@ int main(int argc, char** argv)
     num_cells = 2*grid_size*grid_size;
     cl_mem d_vis_grid_new = clCreateBuffer(context, CL_MEM_READ_WRITE, 
             num_cells * sizeof(float), NULL, &status);
+    status = posix_memalign((void**) &vis_grid_new, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
                         num_cells* sizeof(float), vis_grid_new, 0, NULL, NULL);
     
     program = clCreateProgramWithSource(context, 1, 
         (const char **)&source_str, (const size_t *)&source_size, &status);
 
-    status = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
+     std::string binary_file = getBoardBinaryFile("gridding_kernels", device[0]);
+     printf("Using AOCX: %s\n", binary_file.c_str());
+     program = createProgramFromBinary(context, binary_file.c_str(), device, 1); 
+
+
+    //status = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
+    // don't need to build if already using binaries
+    status = clBuildProgram(program, 0, NULL, "", NULL, NULL);
 
     // Check for errors building kernel
     size_t len = 0;
@@ -426,8 +443,8 @@ int main(int argc, char** argv)
         // Execute the OpenCL kernel on the list
         size_t global_item_size = 1; 
         size_t local_item_size = 1; 
-        status = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, 
-                &global_item_size, &local_item_size, 0, NULL, NULL);
+        status = clEnqueueTaskKernel(queue, kernel, 0, NULL);
+	status = clFinish(queue);
         printf("status: %d\n", status);
         /*
         oskar_grid_wproj_f(
