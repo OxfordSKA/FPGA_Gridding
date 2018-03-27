@@ -355,7 +355,7 @@ int main(int argc, char** argv)
 
     cl_float d_cellsize_rad = cellsize_rad;
     cl_float d_w_scale = w_scale;
-    grid_size = 10000;
+    //grid_size = 10000;
     cl_int d_grid_size = grid_size;
 
     num_cells = 2*grid_size*grid_size;
