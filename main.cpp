@@ -162,12 +162,21 @@ int main(int argc, char** argv)
     /* Arrays for visibility data and baseline coordinate arrays. */
     num_baselines = num_stations * (num_stations - 1) / 2;
     num_times_baselines = max_times_per_block * num_baselines;
+/*
     uu        = calloc(num_times_baselines, coord_element_size);
     vv        = calloc(num_times_baselines, coord_element_size);
     ww        = calloc(num_times_baselines, coord_element_size);
     weight    = calloc(num_times_baselines, vis_element_size);
     weight_1  = calloc(num_times_baselines, vis_element_size);
     vis_block = calloc(num_times_baselines, 2 * vis_element_size);
+*/
+
+    posix_memalign((void**) &uu, 64, num_times_baselines*sizeof(float));
+    posix_memalign((void**) &vv, 64, num_times_baselines*sizeof(float));
+    posix_memalign((void**) &ww, 64, num_times_baselines*sizeof(float));
+    posix_memalign((void**) &weight, 64, num_times_baselines*sizeof(float));
+    posix_memalign((void**) &weight_1, 64, num_times_baselines*sizeof(float));
+    posix_memalign((void**) &vis_block, 64, 2*num_times_baselines*sizeof(float));
 
     printf("Num baselines: %d num stations: %d num times: %d\n", num_baselines, num_stations, max_times_per_block);
     /* Read convolution kernel data from FITS files. */
@@ -182,7 +191,9 @@ int main(int argc, char** argv)
 
     /* Convert kernels to complex values and generate unit weights. */
     num_cells = conv_size_half * conv_size_half * num_w_planes;
-    kernels   = calloc(num_cells, 2 * vis_element_size);
+    //kernels   = calloc(num_cells, 2 * vis_element_size);
+    posix_memalign((void**) &kernels, 64, 2*num_cells *sizeof(float));
+
     for (j = 0; j < num_cells; ++j)
     {
         ((float*)kernels)[2*j]     = ((const float*)kernels_real)[j];
@@ -196,7 +207,10 @@ int main(int argc, char** argv)
     num_cells *= grid_size;
     weights_grid  = calloc(num_cells, coord_element_size);
     vis_grid_orig = calloc(num_cells, 2 * vis_element_size);
-    vis_grid_new  = calloc(num_cells, 2 * vis_element_size);
+    //vis_grid_new  = calloc(num_cells, 2 * vis_element_size);
+
+    posix_memalign((void**) &vis_grid_new, 64, 2*num_cells *sizeof(float));
+    for (i=0; i<2*num_cells; i++) ((float*)vis_grid_new)[i]=0;
 
 
     /* Create timers. */
@@ -289,7 +303,8 @@ int main(int argc, char** argv)
     //num_times_baselines = 100000;
     int block_size = num_times_baselines;
 
-    // create openCL mem buffers for each data structure and copy to device
+    // FPGA GLOBAL MEMORY
+    // create openCL mem buffers for each data structure 
 
     cl_int d_num_w_planes = num_w_planes;
 
@@ -340,6 +355,7 @@ int main(int argc, char** argv)
 
     cl_float d_cellsize_rad = cellsize_rad;
     cl_float d_w_scale = w_scale;
+    grid_size = 10000;
     cl_int d_grid_size = grid_size;
 
     num_cells = 2*grid_size*grid_size;
