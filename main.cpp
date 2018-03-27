@@ -37,7 +37,6 @@
 #include "write_fits_cube.h"
 
 #include <CL/opencl.h>
-//#include "AOCL_UTILS/opencl.h"
 #include "AOCL_UTILS/aocl_utils.h"
 
 #include <math.h>
@@ -158,7 +157,7 @@ int main(int argc, char** argv)
 
     /* Calculate number of visibility blocks in the file. */
     num_blocks = (num_times_total + max_times_per_block - 1) /
-            max_times_per_block;
+        max_times_per_block;
 
     /* Arrays for visibility data and baseline coordinate arrays. */
     num_baselines = num_stations * (num_stations - 1) / 2;
@@ -198,7 +197,7 @@ int main(int argc, char** argv)
     weights_grid  = calloc(num_cells, coord_element_size);
     vis_grid_orig = calloc(num_cells, 2 * vis_element_size);
     vis_grid_new  = calloc(num_cells, 2 * vis_element_size);
-    
+
 
     /* Create timers. */
     tmr_grid_vis_orig = oskar_timer_create(OSKAR_TIMER_NATIVE);
@@ -252,33 +251,33 @@ int main(int argc, char** argv)
     size_t valueSize;
     cl_uint num_platforms, num_devices;
 
-// Get the OpenCL platform.
-  platform = findPlatform("Intel");
-  if(platform == NULL) {
-    printf("ERROR: Unable to find Intel(R) FPGA OpenCL platform.\n");
-    return false;
-  }
-  // Query the available OpenCL devices.
-  scoped_array<cl_device_id> devices;
+    // Get the OpenCL platform.
+    platform = findPlatform("Intel");
+    if(platform == NULL) {
+        printf("ERROR: Unable to find Intel(R) FPGA OpenCL platform.\n");
+        return false;
+    }
+    // Query the available OpenCL devices.
+    scoped_array<cl_device_id> devices;
 
-  devices.reset(getDevices(platform, CL_DEVICE_TYPE_ALL, &num_devices));
+    devices.reset(getDevices(platform, CL_DEVICE_TYPE_ALL, &num_devices));
 
-  // We'll just use the first device.
-  device = devices[0];
-  
+    // We'll just use the first device.
+    device = devices[0];
 
-  printf("Platform: %s\n", getPlatformName(platform).c_str());
-  printf("Using %d device(s)\n", num_devices);
-  for(unsigned i = 0; i < num_devices; ++i) {
-    printf("  %s\n", getDeviceName(devices[i]).c_str());
-  }
+
+    printf("Platform: %s\n", getPlatformName(platform).c_str());
+    printf("Using %d device(s)\n", num_devices);
+    for(unsigned i = 0; i < num_devices; ++i) {
+        printf("  %s\n", getDeviceName(devices[i]).c_str());
+    }
 
 
 
     status = clGetPlatformIDs(1, &platform, &num_platforms);
     printf("NUM PLATFORMS %d \n", num_platforms);
     status = clGetDeviceIDs( platform, CL_DEVICE_TYPE_DEFAULT, 1, 
-                        &device, &num_devices);
+            &device, &num_devices);
     clGetDeviceInfo(device, CL_DEVICE_NAME, 0, NULL, &valueSize);
     char* value = (char*) malloc(valueSize);
     clGetDeviceInfo(device, CL_DEVICE_NAME, valueSize, value, NULL);
@@ -287,7 +286,7 @@ int main(int argc, char** argv)
     context = clCreateContext( NULL, 1, &device, NULL, NULL, &status);
     queue = clCreateCommandQueue(context, device, 0, &status);
 
-	num_times_baselines = 100000;
+    //num_times_baselines = 100000;
     int block_size = num_times_baselines;
 
     // create openCL mem buffers for each data structure and copy to device
@@ -297,7 +296,7 @@ int main(int argc, char** argv)
     cl_mem d_support = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_w_planes * sizeof(int), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_support, CL_TRUE, 0,
-                        num_w_planes* sizeof(int), support, 0, NULL, NULL);
+            num_w_planes* sizeof(int), support, 0, NULL, NULL);
 
     cl_int d_oversample = oversample;
     cl_int d_conv_size_half = conv_size_half;
@@ -307,7 +306,7 @@ int main(int argc, char** argv)
             num_cells * sizeof(float), NULL, &status);
     //status = posix_memalign((void**) &kernels, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_kernels, CL_TRUE, 0,
-                        num_cells* sizeof(float), kernels, 0, NULL, NULL);
+            num_cells* sizeof(float), kernels, 0, NULL, NULL);
 
     cl_int d_block_size = num_times_baselines;
 
@@ -331,13 +330,13 @@ int main(int argc, char** argv)
             num_cells * sizeof(float), NULL, &status);
     //status = posix_memalign((void**) &vis_block, 64, num_cells *sizeof(float));
 
-    
+
 
     num_cells = num_times_baselines;
     cl_mem d_weight = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
     //status = posix_memalign((void**) &weight, 64, num_cells *sizeof(float));
-    
+
 
     cl_float d_cellsize_rad = cellsize_rad;
     cl_float d_w_scale = w_scale;
@@ -346,13 +345,13 @@ int main(int argc, char** argv)
     num_cells = 2*grid_size*grid_size;
     cl_mem d_vis_grid_new = clCreateBuffer(context, CL_MEM_READ_WRITE, 
             num_cells * sizeof(float), NULL, &status);
-   // status = posix_memalign((void**) &vis_grid_new, 64, num_cells *sizeof(float));
+    // status = posix_memalign((void**) &vis_grid_new, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
-                        num_cells* sizeof(float), vis_grid_new, 0, NULL, NULL);
-    
-     std::string binary_file = getBoardBinaryFile("gridding_kernels", device);
-     printf("Using AOCX: %s\n", binary_file.c_str());
-     program = createProgramFromBinary(context, binary_file.c_str(), &device, 1); 
+            num_cells* sizeof(float), vis_grid_new, 0, NULL, NULL);
+
+    std::string binary_file = getBoardBinaryFile("gridding_kernels", device);
+    printf("Using AOCX: %s\n", binary_file.c_str());
+    program = createProgramFromBinary(context, binary_file.c_str(), &device, 1); 
 
 
     //status = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
@@ -366,7 +365,7 @@ int main(int argc, char** argv)
     char *buffer = (char*) calloc(len, sizeof(char));
     ret = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, len, buffer, NULL);
     printf("kernel compile error log: %s\n", buffer);
-    
+
 
     kernel = clCreateKernel(program, "oskar_grid_wproj_cl", &status);
 
@@ -387,11 +386,11 @@ int main(int argc, char** argv)
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_new);
 
-	printf("finished init opencl\n");
+    printf("finished init opencl\n");
     /*===================================================================*/
     /* End init OpenCL */
     /*===================================================================*/
-    
+
 
     /* Loop over visibility blocks to generate the visibility grid. */
     if (!status) printf("Gridding visibilities...\n");
@@ -422,9 +421,6 @@ int main(int argc, char** argv)
         /* Read and scale the baseline coordinates. */
         read_coords(h, i, coord_precision,
                 block_size, uu, vv, ww, &status);
-        for (int i=0; i<num_times_baselines; i++){
-            //printf("ww: %f\n", ((float*) ww)[i]);
-        }
         scale_coords(freq_start_hz, coord_precision,
                 block_size, uu, vv, ww);
 
@@ -438,27 +434,27 @@ int main(int argc, char** argv)
 
         /* Update new visibility grid. */
         oskar_timer_resume(tmr_grid_vis_new);
-        
-            printf("VIS: %.15f\n", ((float*)vis_block)[100]);
-        
+
+        printf("VIS: %.15f\n", ((float*)vis_block)[10]);
+
         num_cells = num_times_baselines;
-    	status = clEnqueueWriteBuffer(queue, d_uu, CL_TRUE, 0,
-   			num_cells* sizeof(float), (float*) uu, 0, NULL, NULL);
-   			
+        status = clEnqueueWriteBuffer(queue, d_uu, CL_TRUE, 0,
+                num_cells* sizeof(float), (float*) uu, 0, NULL, NULL);
+
         status = clEnqueueWriteBuffer(queue, d_vv, CL_TRUE, 0,
-        	num_cells* sizeof(float), (float*) vv, 0, NULL, NULL);
-                
+                num_cells* sizeof(float), (float*) vv, 0, NULL, NULL);
+
         status = clEnqueueWriteBuffer(queue, d_ww, CL_TRUE, 0,
-   			 num_cells* sizeof(float), ww, 0, NULL, NULL);
-                
+                num_cells* sizeof(float), ww, 0, NULL, NULL);
+
         num_cells = 2*num_times_baselines;
         status = clEnqueueWriteBuffer(queue, d_vis_block, CL_TRUE, 0,
-        	num_cells* sizeof(float), vis_block, 0, NULL, NULL);
-         
-         num_cells = num_times_baselines;
-         status = clEnqueueWriteBuffer(queue, d_weight, CL_TRUE, 0,
-        	num_cells* sizeof(float), weight, 0, NULL, NULL);
-                
+                num_cells* sizeof(float), vis_block, 0, NULL, NULL);
+
+        num_cells = num_times_baselines;
+        status = clEnqueueWriteBuffer(queue, d_weight, CL_TRUE, 0,
+                num_cells* sizeof(float), weight, 0, NULL, NULL);
+
         /*===================================================================*/
         /*===================================================================*/
         /* CALL THE REPLACEMENT GRIDDING FUNCTION HERE. */
@@ -472,9 +468,35 @@ int main(int argc, char** argv)
         size_t global_item_size = 1; 
         size_t local_item_size = 1; 
         status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
-	status = clFinish(queue);
+        status = clFinish(queue);
         printf("status: %d\n", status);
         /*
+           oskar_grid_wproj_f(
+           (size_t) num_w_planes,
+           support,
+           oversample,
+           conv_size_half,
+           (const float*) kernels,
+           block_size,
+           (const float*) uu,
+           (const float*) vv,
+           (const float*) ww,
+           (const float*) vis_block,
+           (const float*) weight,
+           (float) cellsize_rad,
+           (float) w_scale,
+           grid_size,
+           &num_skipped_new,
+           &norm_new,
+           (float*) vis_grid_new);
+           */
+#endif
+        /*===================================================================*/
+        /*===================================================================*/
+        oskar_timer_pause(tmr_grid_vis_new);
+        /* Update the reference visibility grid. */
+        printf("running reference version\n");
+        oskar_timer_resume(tmr_grid_vis_orig);
         oskar_grid_wproj_f(
                 (size_t) num_w_planes,
                 support,
@@ -490,35 +512,9 @@ int main(int argc, char** argv)
                 (float) cellsize_rad,
                 (float) w_scale,
                 grid_size,
-                &num_skipped_new,
-                &norm_new,
-                (float*) vis_grid_new);
-        */
-#endif
-        /*===================================================================*/
-        /*===================================================================*/
-        oskar_timer_pause(tmr_grid_vis_new);
-        /* Update the reference visibility grid. */
-        printf("running reference version\n");
-        oskar_timer_resume(tmr_grid_vis_orig);
-        oskar_grid_wproj_f(
-                        (size_t) num_w_planes,
-                        support,
-                        oversample,
-                        conv_size_half,
-                        (const float*) kernels,
-                        block_size,
-                        (const float*) uu,
-                        (const float*) vv,
-                        (const float*) ww,
-                        (const float*) vis_block,
-                        (const float*) weight,
-                        (float) cellsize_rad,
-                        (float) w_scale,
-                        grid_size,
-                        &num_skipped_orig,
-                        &norm_orig,
-                        (float*) vis_grid_orig);
+                &num_skipped_orig,
+                &norm_orig,
+                (float*) vis_grid_orig);
         oskar_timer_pause(tmr_grid_vis_orig);
     }
 
@@ -526,15 +522,16 @@ int main(int argc, char** argv)
     oskar_binary_free(h);
 
     // Read back buffers
-    
+
     num_cells = 2*grid_size*grid_size;
     status = clEnqueueReadBuffer(queue, d_vis_grid_new, CL_TRUE, 0, 
-        num_cells * sizeof(float), vis_grid_new, 0, NULL, NULL);
+            num_cells * sizeof(float), vis_grid_new, 0, NULL, NULL);
 
     /* Compare visibility grids to check correctness. */
 #if HAVE_NEW_VERSION
     if (!status)
     {
+        num_cells = grid_size*grid_size;
         printf("Checking grids...\n");
         const float* grid1 = (const float*)vis_grid_orig;
         const float* grid2 = (const float*)vis_grid_new;
@@ -549,7 +546,7 @@ int main(int argc, char** argv)
             }
         }
     }
-    
+
 
 #if WRITE_GRID
     printf("Writing new implementation image\n");
@@ -587,7 +584,7 @@ int main(int argc, char** argv)
 #if WRITE_DIFF_GRID
     write_fits_cube(OSKAR_SINGLE|OSKAR_COMPLEX, gridA, "vis_grid_diff", grid_size, grid_size, 1, 0, &writeImageStatus);
 #endif
- 
+
 #else
     printf("No new version of visibility grid to check.\n");
 #endif
@@ -607,18 +604,18 @@ int main(int argc, char** argv)
     free(vis_grid_orig);
     free(vis_grid_new);
     free(weights_grid);
-  if(kernel) {
-    clReleaseKernel(kernel);
-  }
-  if(program) {
-    clReleaseProgram(program);
-  }
-  if(queue) {
-    clReleaseCommandQueue(queue);
-  }
-  if(context) {
-    clReleaseContext(context);
-  }
+    if(kernel) {
+        clReleaseKernel(kernel);
+    }
+    if(program) {
+        clReleaseProgram(program);
+    }
+    if(queue) {
+        clReleaseCommandQueue(queue);
+    }
+    if(context) {
+        clReleaseContext(context);
+    }
     /* Report timing. */
     printf("Gridding visibilities took %.3f seconds (original version)\n",
             oskar_timer_elapsed(tmr_grid_vis_orig));
