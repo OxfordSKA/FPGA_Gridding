@@ -23,6 +23,7 @@ __kernel void oskar_grid_wproj_cl(
         const float cell_size_rad,
         const float w_scale,
         const int grid_size,
+        const int grid_topLeft,
         __global float* restrict grid)
 {
 
