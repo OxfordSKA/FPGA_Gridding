@@ -31,10 +31,10 @@
 #include "oskar_timer.h"
 #include "oskar_grid_weights.h"
 #include "oskar_grid_wproj.h"
-#include "oskar_grid_wproj_gpu.hpp"
 #include "read_kernel.h"
 #include "read_vis.h"
 #include "write_fits_cube.h"
+#include "Defines.h"
 
 #include <CL/opencl.h>
 #include "AOCL_UTILS/aocl_utils.h"
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     int dim_start_and_size[6], max_times_per_block;
     double freq_start_hz;
     void *vis_block = 0, *uu = 0, *vv = 0, *ww = 0, *weight_1 = 0, *weight = 0;
-    void *vis_grid_orig = 0, *vis_grid_new = 0, *weights_grid = 0;
+    void *vis_grid_orig = 0, *vis_grid_new = 0, *vis_grid_trimmed_new, *weights_grid = 0;
     char *input_root = 0, *file_name = 0;
 
     // for writing fits files
@@ -211,6 +211,10 @@ int main(int argc, char** argv)
 
     posix_memalign((void**) &vis_grid_new, 64, 2*num_cells *sizeof(float));
     for (i=0; i<2*num_cells; i++) ((float*)vis_grid_new)[i]=0;
+    
+    num_cells = GRID_U * GRID_V;
+    posix_memalign((void**) &vis_grid_trimmed_new, 64, 2*num_cells *sizeof(float));
+    for (i=0; i<2*num_cells; i++) ((float*)vis_grid_trimmed_new)[i]=0;
 
 
     /* Create timers. */
@@ -319,7 +323,6 @@ int main(int argc, char** argv)
     num_cells = 2*conv_size_half * conv_size_half * num_w_planes;
     cl_mem d_kernels = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    //status = posix_memalign((void**) &kernels, 64, num_cells *sizeof(float));
     status = clEnqueueWriteBuffer(queue, d_kernels, CL_TRUE, 0,
             num_cells* sizeof(float), kernels, 0, NULL, NULL);
 
@@ -328,42 +331,40 @@ int main(int argc, char** argv)
     num_cells = num_times_baselines;
     cl_mem d_uu = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    //status = posix_memalign((void**) &uu, 64, num_cells *sizeof(float));
 
     cl_mem d_vv = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    //status = posix_memalign((void**) &vv, 64, num_cells *sizeof(float));
 
     cl_mem d_ww = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    //status = posix_memalign((void**) &ww, 64, num_cells *sizeof(float));
     printf("W!!!! %f\n", ((float*) ww)[100]);
 
 
     num_cells = 2*num_times_baselines;
     cl_mem d_vis_block = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    //status = posix_memalign((void**) &vis_block, 64, num_cells *sizeof(float));
 
 
 
     num_cells = num_times_baselines;
     cl_mem d_weight = clCreateBuffer(context, CL_MEM_READ_ONLY, 
             num_cells * sizeof(float), NULL, &status);
-    //status = posix_memalign((void**) &weight, 64, num_cells *sizeof(float));
 
 
     cl_float d_cellsize_rad = cellsize_rad;
     cl_float d_w_scale = w_scale;
-    //grid_size = 10000;
+
+    cl_int d_grid_topLeft_x = TRIMMED_REGION_OFFSET_U;
+    cl_int d_grid_topLeft_y = TRIMMED_REGION_OFFSET_V;
+
+    cl_int d_trimmed_grid_size = GRID_U;
     cl_int d_grid_size = grid_size;
 
-    num_cells = 2*grid_size*grid_size;
-    cl_mem d_vis_grid_new = clCreateBuffer(context, CL_MEM_READ_WRITE, 
+    num_cells = 2*GRID_U*GRID_V;
+    cl_mem d_vis_grid_trimmed_new = clCreateBuffer(context, CL_MEM_READ_WRITE, 
             num_cells * sizeof(float), NULL, &status);
-    // status = posix_memalign((void**) &vis_grid_new, 64, num_cells *sizeof(float));
-    status = clEnqueueWriteBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
-            num_cells* sizeof(float), vis_grid_new, 0, NULL, NULL);
+    status = clEnqueueWriteBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
+            num_cells* sizeof(float), vis_grid_trimmed_new, 0, NULL, NULL);
 
     std::string binary_file = getBoardBinaryFile("gridding_kernels", device);
     printf("Using AOCX: %s\n", binary_file.c_str());
@@ -399,8 +400,11 @@ int main(int argc, char** argv)
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_weight);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cellsize_rad);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_new);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_x);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_y);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
 
     printf("finished init opencl\n");
     /*===================================================================*/
@@ -539,9 +543,19 @@ int main(int argc, char** argv)
 
     // Read back buffers
 
-    num_cells = 2*grid_size*grid_size;
-    status = clEnqueueReadBuffer(queue, d_vis_grid_new, CL_TRUE, 0, 
-            num_cells * sizeof(float), vis_grid_new, 0, NULL, NULL);
+    num_cells = 2*GRID_U*GRID_V;
+    status = clEnqueueReadBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0, 
+            num_cells * sizeof(float), vis_grid_trimmed_new, 0, NULL, NULL);
+
+    // Copy trimmed grid back to full grid -- won't be done in final version when we have more than
+    // 2GB available on device
+	int gridOutOffset = TRIMMED_REGION_OFFSET_V*grid_size*2 + TRIMMED_REGION_OFFSET_U*2;
+    for (int v=0; v<GRID_V; v++){
+        for (int u=0; u<GRID_U; u++){
+            ((float*)vis_grid_new)[gridOutOffset + v*grid_size*2 + u*2] = ((float*)vis_grid_trimmed_new)[(v*GRID_U+u)*2];
+            ((float*)vis_grid_new)[gridOutOffset + v*grid_size*2 + u*2 +1] = ((float*)vis_grid_trimmed_new)[(v*GRID_U+u)*2 + 1];
+        }
+    }
 
     /* Compare visibility grids to check correctness. */
 #if HAVE_NEW_VERSION
