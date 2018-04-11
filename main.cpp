@@ -490,8 +490,8 @@ int main(int argc, char** argv)
         status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
         status = clFinish(queue);
         printf("status: %d\n", status);
-        /*
-           oskar_grid_wproj_f(
+        
+           oskar_grid_wproj_fpga_f(
            (size_t) num_w_planes,
            support,
            oversample,
@@ -509,7 +509,7 @@ int main(int argc, char** argv)
            &num_skipped_new,
            &norm_new,
            (float*) vis_grid_new);
-           */
+           
 #endif
         /*===================================================================*/
         /*===================================================================*/
