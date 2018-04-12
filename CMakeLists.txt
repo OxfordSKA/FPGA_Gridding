@@ -9,6 +9,7 @@ endif()
 
 #! Declare the CMake project.
 project(grid_visibilities C CXX)
+set (CMAKE_CXX_STANDARD 11)
 
 #! Find Threads.
 find_package(Threads REQUIRED)
@@ -63,6 +64,7 @@ set(read_vis_SRC
     utils/read_vis.c
     utils/write_fits_cube.c
     oskar_grid_wproj.c
+    oskar_grid_wproj_fpga.cpp
     AOCL_UTILS/opencl.cpp
     AOCL_UTILS/options.cpp
     main.cpp

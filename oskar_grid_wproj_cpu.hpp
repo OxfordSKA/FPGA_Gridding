@@ -159,7 +159,7 @@ void compact_oversample_wkernels(
       std::vector<int>   &compacted_oversampled_wkernel_start_idx
       );
 
-void oskar_grid_wproj_fpga_f(
+void oskar_grid_wproj_cpu_f(
     const int num_w_planes,
     const int* support,
     const int oversample,

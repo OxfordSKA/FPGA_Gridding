@@ -17,14 +17,11 @@
 #include <cmath>
 #include <algorithm>
 
-#include <CL/opencl.h>
-#include "AOCL_UTILS/aocl_utils.h"
-
 #ifdef USEASSERTS
 #include <assert.h>
 #endif
 
-#include "oskar_grid_wproj_fpga.hpp"
+#include "oskar_grid_wproj_cpu.hpp"
 
 
 // How to sort Tiles by the number of visibilities they contain.
@@ -623,7 +620,7 @@ void compact_oversample_wkernels(
 }
 
 // The main function that does the gridding by calling all the functions defined above.
-void oskar_grid_wproj_fpga_f(
+void oskar_grid_wproj_cpu_f(
 	const int num_w_planes, 
 	const int* support,
 	const int oversample, 
@@ -794,198 +791,12 @@ void oskar_grid_wproj_fpga_f(
 				boxTop, boxBot, tileWidth, tileHeight, numTiles, 
 				offsetsPointsInTilesLayered, wk_offsetsPointsInTilesLayered,
 			        bucket_uu, bucket_vv, bucket_ww, bucket_vis, bucket_weight);
-
-    /*===================================================================*/
-    /* Init OpenCL */
-    /*===================================================================*/
-    // OpenCL runtime configuration
-    static cl_platform_id platform = NULL;
-    static cl_device_id device = NULL;
-    static cl_context context = NULL;
-    static cl_command_queue queue = NULL;
-    static cl_kernel kernel = NULL;
-    static cl_program program = NULL;
-
-    cl_int cl_status;
-    size_t valueSize;
-    cl_uint num_platforms, num_devices;
-
-    // Get the OpenCL platform.
-    platform = findPlatform("Intel");
-    if(platform == NULL) {
-        printf("ERROR: Unable to find Intel(R) FPGA OpenCL platform.\n");
-        return false;
-    }
-    // Query the available OpenCL devices.
-    scoped_array<cl_device_id> devices;
-
-    devices.reset(getDevices(platform, CL_DEVICE_TYPE_ALL, &num_devices));
-
-    // We'll just use the first device.
-    device = devices[0];
-
-
-    printf("Platform: %s\n", getPlatformName(platform).c_str());
-    printf("Using %d device(s)\n", num_devices);
-    for(unsigned i = 0; i < num_devices; ++i) {
-        printf("  %s\n", getDeviceName(devices[i]).c_str());
-    }
-
-
-
-    status = clGetPlatformIDs(1, &platform, &num_platforms);
-    printf("NUM PLATFORMS %d \n", num_platforms);
-    status = clGetDeviceIDs( platform, CL_DEVICE_TYPE_DEFAULT, 1,
-            &device, &num_devices);
-    clGetDeviceInfo(device, CL_DEVICE_NAME, 0, NULL, &valueSize);
-    char* value = (char*) malloc(valueSize);
-    clGetDeviceInfo(device, CL_DEVICE_NAME, valueSize, value, NULL);
-    printf("Device: %s\n", value);
-    free(value);
-    context = clCreateContext( NULL, 1, &device, NULL, NULL, &status);
-    queue = clCreateCommandQueue(context, device, 0, &status);
-
-    //num_times_baselines = 100000;
-    int block_size = num_times_baselines;
-
-    // FPGA GLOBAL MEMORY
-// create openCL mem buffers for each data structure 
-
-    cl_int d_num_w_planes = num_w_planes;
-
-    cl_mem d_support = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_w_planes * sizeof(int), NULL, &status);
-    status = clEnqueueWriteBuffer(queue, d_support, CL_TRUE, 0,
-            num_w_planes* sizeof(int), support, 0, NULL, NULL);
-
-    cl_int d_oversample = oversample;
-    cl_int d_conv_size_half = conv_size_half;
-
-    num_cells = 2*conv_size_half * conv_size_half * num_w_planes;
-    cl_mem d_kernels = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-    status = clEnqueueWriteBuffer(queue, d_kernels, CL_TRUE, 0,
-            num_cells* sizeof(float), kernels, 0, NULL, NULL);
-
-    cl_int d_block_size = num_times_baselines;
-
-    num_cells = num_times_baselines;
-    cl_mem d_uu = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-
-    cl_mem d_vv = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-
-    cl_mem d_ww = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-    printf("W!!!! %f\n", ((float*) ww)[100]);
-
-
-    num_cells = 2*num_times_baselines;
-    cl_mem d_vis_block = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-
-
-
-    num_cells = num_times_baselines;
-    cl_mem d_weight = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-
-
-    cl_float d_cellsize_rad = cellsize_rad;
-    cl_float d_w_scale = w_scale;
-
-    cl_int d_grid_topLeft_x = TRIMMED_REGION_OFFSET_U;
-    cl_int d_grid_topLeft_y = TRIMMED_REGION_OFFSET_V;
-
-    cl_int d_trimmed_grid_size = GRID_U;
-    cl_int d_grid_size = grid_size;
-    num_cells = 2*GRID_U*GRID_V;
-    cl_mem d_vis_grid_trimmed_new = clCreateBuffer(context, CL_MEM_READ_WRITE,
-            num_cells * sizeof(float), NULL, &status);
-    status = clEnqueueWriteBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
-            num_cells* sizeof(float), vis_grid_trimmed_new, 0, NULL, NULL);
-
-    std::string binary_file = getBoardBinaryFile("gridding_kernels", device);
-    printf("Using AOCX: %s\n", binary_file.c_str());
-    program = createProgramFromBinary(context, binary_file.c_str(), &device, 1);
-
-
-    //status = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
-    // don't need to build if already using binaries
-    status = clBuildProgram(program, 0, NULL, "", NULL, NULL);
-
-    // Check for errors building kernel
-    size_t len = 0;
-    cl_int ret = CL_SUCCESS;
-    ret = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, 0, NULL, &len);
-    char *buffer = (char*) calloc(len, sizeof(char));
-    ret = clGetProgramBuildInfo(program, device, CL_PROGRAM_BUILD_LOG, len, buffer, NULL);
-    printf("kernel compile error log: %s\n", buffer);
-
-
-    kernel = clCreateKernel(program, "oskar_grid_wproj_cl", &status);
-
-    int arg=0;
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_num_w_planes);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_support);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_oversample);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_conv_size_half);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_kernels);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_block_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_uu);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vv);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_ww);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_block);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_weight);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cellsize_rad);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_x);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_y);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
-
-    printf("finished init opencl\n");
-    /*===================================================================*/
-    /* End init OpenCL */
-    /*===================================================================*/
-    
-    num_cells = num_times_baselines;
-    status = clEnqueueWriteBuffer(queue, d_uu, CL_TRUE, 0,
-            num_cells* sizeof(float), (float*) uu, 0, NULL, NULL);
-
-    status = clEnqueueWriteBuffer(queue, d_vv, CL_TRUE, 0,
-            num_cells* sizeof(float), (float*) vv, 0, NULL, NULL);
-
-    status = clEnqueueWriteBuffer(queue, d_ww, CL_TRUE, 0,
-            num_cells* sizeof(float), ww, 0, NULL, NULL);
-
-    num_cells = 2*num_times_baselines;
-    status = clEnqueueWriteBuffer(queue, d_vis_block, CL_TRUE, 0,
-            num_cells* sizeof(float), vis_block, 0, NULL, NULL);
-
-    num_cells = num_times_baselines;
-    status = clEnqueueWriteBuffer(queue, d_weight, CL_TRUE, 0,
-            num_cells* sizeof(float), weight, 0, NULL, NULL);
-
-
-
-
-
-  
+      
   // Check we actually have some work to do.
   // If we've set factor = 1 then there won't be any....
   if(numTiles.u > 0 && numTiles.v > 0) 
     {
-        // Process the whole grid on FPGA
-        size_t global_item_size = 1;
-        size_t local_item_size = 1;
-        //status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
-        status = clFinish(queue);
-        printf("status: %d\n", status);
-
-/*
+      // Process the whole grid
       oskar_process_all_tiles(num_w_planes, support, oversample, compacted_wkernel_start.data(),
 						   compacted_wkernels.data(), cell_size_rad, w_scale, grid_size,
 						   boxTop.u, boxTop.v, tileWidth, tileHeight, numTiles.u, numTiles.v,
@@ -993,13 +804,8 @@ void oskar_grid_wproj_fpga_f(
 						   bucket_uu.data(), bucket_vv.data(), bucket_ww.data(), bucket_vis.data(), 
                            bucket_weight.data(),
 						   workQueue_pu.data(), workQueue_pv.data(), norm, grid);
- */     
+      
     }
-
-    // Read back buffers
-    num_cells = 2*GRID_U*GRID_V;
-    status = clEnqueueReadBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
-            num_cells * sizeof(float), vis_grid_trimmed_new, 0, NULL, NULL);
 
   //time2 = omp_get_wtime() - time1;
 

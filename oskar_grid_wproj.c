@@ -151,17 +151,10 @@ void oskar_grid_wproj_f(
 
     /* Loop over visibilities. */
     *num_skipped = 0;
-    //for (i = 0; i < num_points; ++i)
-    for (i = 0; i < 100000; ++i)
+    for (i = 0; i < num_points; ++i)
+    //for (i = 0; i < 100000; ++i)
     {
-    	if ((i%1000)==0) printf("i: %d\n", i);
-        /*
-        //if ((i%130816)!=120776) continue;
-        if ((i%130816)!=109571) continue;
-        //if ((i%130816)!=108953 && (i%130816)!=109367 && (i%130816)!=109368 && (i%130816)!=109574 && (i%130816)!=109571) continue;
-        if (i>=130816*90+120778) continue;
-        if (i<130816*85+120778) continue;
-        */
+    	//if ((i%1000)==0) printf("i: %d\n", i);
         double sum = 0.0;
         int j, k;
 
@@ -175,11 +168,6 @@ void oskar_grid_wproj_f(
         const int grid_u = (int)roundf(pos_u) + grid_centre;
         const int grid_v = (int)roundf(pos_v) + grid_centre;
 
-        //printf("pos u %f pos v %f\n", pos_u, pos_v);
-        //printf("grid u %d grid v %d\n", grid_u, grid_v);
-
-        //if (grid_u==9228 && grid_v==9257) printf("bl: %d\n", i%130816);
-        //if (grid_u>9228-5 &&grid_u<9228+5 && grid_v>9257-5 && grid_v<9257+5) printf("bl: %d\n", i%130816);
         /* Get visibility data. */
         // hard code weight value to 1.0
         const float weight_i = 1.0;
