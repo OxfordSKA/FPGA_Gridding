@@ -453,7 +453,6 @@ int main(int argc, char** argv)
                 (const float*) weights_grid);
 
         /* Update new visibility grid. */
-        oskar_timer_resume(tmr_grid_vis_new);
 
         printf("VIS: %.15f\n", ((float*)vis_block)[10]);
 
@@ -480,6 +479,7 @@ int main(int argc, char** argv)
         /* CALL THE REPLACEMENT GRIDDING FUNCTION HERE. */
 
         printf("conv_size_half %d, wsupport max %d\n", conv_size_half, support[num_w_planes-1]);
+        oskar_timer_resume(tmr_grid_vis_new);
 #if HAVE_NEW_VERSION
         /* Define a new name and call the new function. */
         printf("running new version\n");
@@ -489,7 +489,6 @@ int main(int argc, char** argv)
         size_t local_item_size = 1; 
         status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
         status = clFinish(queue);
-        printf("status: %d\n", status);
         /*
            oskar_grid_wproj_f(
            (size_t) num_w_planes,
