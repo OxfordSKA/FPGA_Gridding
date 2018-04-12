@@ -946,6 +946,25 @@ void oskar_grid_wproj_fpga_f(
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_y);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
 
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_num_w_planes);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_support);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_oversample);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_conv_size_half);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_kernels);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_block_size);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_uu);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vv);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_ww);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_block);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_weight);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cellsize_rad);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_x);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_y);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
+
     printf("finished init opencl\n");
     /*===================================================================*/
     /* End init OpenCL */
