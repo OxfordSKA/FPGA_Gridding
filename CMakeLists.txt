@@ -15,7 +15,7 @@ set (CMAKE_CXX_STANDARD 11)
 find_package(Threads REQUIRED)
 
 #! Find OpenCL
-find_package(OpenCL REQUIRED)
+#find_package(OpenCL REQUIRED)
 
 set(AOCL_COMPILE_CONFIG "-I/usr/local/intelFPGA_pro/17.1/hld/host/include")
 set(AOCL_LINK_CONFIG "-L/usr/local/intelFPGA_pro/17.1/hld/board/a10_ref/linux64/lib -L/usr/local/intelFPGA_pro/17.1/hld/host/linux64/lib -Wl,--no-as-needed -lalteracl -laltera_a10_ref_mmd -lelf")

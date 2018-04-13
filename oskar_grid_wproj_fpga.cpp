@@ -355,6 +355,7 @@ int tileLookup(
   return tileOff.size()-1;
 }
 
+/*
 // Process the grid Tiles 
 void oskar_process_all_tiles(
 	   const int num_w_planes, 
@@ -492,6 +493,7 @@ void oskar_process_all_tiles(
 #undef NUM_POINTS_IN_TILES
 #undef OFFSETS_IN_TILES
 }
+*/
 
 // Compact the wkernels so that only the values for the wsupport of each kernel level are stored,
 // rather than storing all kernels with max(wsupport) elements. Also reorder and copy the elements of
@@ -937,7 +939,7 @@ void oskar_grid_wproj_fpga_f(
     cl_mem d_vis_grid_new = clCreateBuffer(context, CL_MEM_READ_WRITE,
             num_cells * sizeof(float), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
-            num_cells* sizeof(float), vis_grid_new, 0, NULL, NULL);
+            num_cells* sizeof(float), grid, 0, NULL, NULL);
 
    
     // get binary file
@@ -1004,9 +1006,16 @@ void oskar_grid_wproj_fpga_f(
         // Process the whole grid on FPGA
         size_t global_item_size = 1;
         size_t local_item_size = 1;
-        //status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
+
+        auto start = std::chrono::high_resolution_clock::now();
+
+        status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
         status = clFinish(queue);
-        printf("status: %d\n", status);
+
+        auto stop = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> diff = stop-start;
+        printf("Gridding time on fpga: %gms\n", diff.count()*1000);
+
 
 /*
       oskar_process_all_tiles(num_w_planes, support, oversample, compacted_wkernel_start.data(),
@@ -1020,9 +1029,10 @@ void oskar_grid_wproj_fpga_f(
     }
 
     // Read back buffers
-    num_cells = 2*GRID_U*GRID_V;
-    status = clEnqueueReadBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
-            num_cells * sizeof(float), vis_grid_trimmed_new, 0, NULL, NULL);
+    //num_cells = 2*GRID_U*GRID_V;
+    int num_cells = 2*grid_size*grid_size;
+    status = clEnqueueReadBuffer(queue, d_vis_new, CL_TRUE, 0,
+            num_cells * sizeof(float), grid, 0, NULL, NULL);
 
   //time2 = omp_get_wtime() - time1;
 
