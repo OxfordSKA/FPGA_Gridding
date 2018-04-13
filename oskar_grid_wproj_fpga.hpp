@@ -140,7 +140,6 @@ void oskar_process_all_tiles(
        const float* bucket_vv,
        const float* bucket_ww,
        const float2* bucket_vis,
-       const float* bucket_weight,
        const int *workQueue_pu, const int *workQueue_pv,
        double* norm,
        float* grid

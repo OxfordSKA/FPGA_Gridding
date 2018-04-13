@@ -765,6 +765,7 @@ void oskar_grid_wproj_fpga_f(
   // Sort the work queue into descending order by number of visibilities.
   // This will hopefully make a sensible order in which to process them.
   std::sort(workQueue.begin(), workQueue.end(), sortTilesByVis);
+  
   // put workQueue into format that can be sent to an OpenCl kernel
   std::vector<int> workQueue_pu(nTiles);
   std::vector<int> workQueue_pv(nTiles);
@@ -831,8 +832,6 @@ void oskar_grid_wproj_fpga_f(
         printf("  %s\n", getDeviceName(devices[i]).c_str());
     }
 
-
-
     status = clGetPlatformIDs(1, &platform, &num_platforms);
     printf("NUM PLATFORMS %d \n", num_platforms);
     status = clGetDeviceIDs( platform, CL_DEVICE_TYPE_DEFAULT, 1,
@@ -849,7 +848,7 @@ void oskar_grid_wproj_fpga_f(
     int block_size = num_times_baselines;
 
     // FPGA GLOBAL MEMORY
-// create openCL mem buffers for each data structure 
+    // create openCL mem buffers for each data structure 
 
     cl_int d_num_w_planes = num_w_planes;
 
@@ -859,54 +858,85 @@ void oskar_grid_wproj_fpga_f(
             num_w_planes* sizeof(int), support, 0, NULL, NULL);
 
     cl_int d_oversample = oversample;
-    cl_int d_conv_size_half = conv_size_half;
 
-    num_cells = 2*conv_size_half * conv_size_half * num_w_planes;
-    cl_mem d_kernels = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-    status = clEnqueueWriteBuffer(queue, d_kernels, CL_TRUE, 0,
-            num_cells* sizeof(float), kernels, 0, NULL, NULL);
-
-    cl_int d_block_size = num_times_baselines;
-
-    num_cells = num_times_baselines;
-    cl_mem d_uu = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-
-    cl_mem d_vv = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-
-    cl_mem d_ww = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-    printf("W!!!! %f\n", ((float*) ww)[100]);
-
-
-    num_cells = 2*num_times_baselines;
-    cl_mem d_vis_block = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-
-
-
-    num_cells = num_times_baselines;
-    cl_mem d_weight = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_cells * sizeof(float), NULL, &status);
-
+    cl_mem d_compact_kernels_start = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            num_w_planes * sizeof(int), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_compact_kernels_start, CL_TRUE, 0,
+            num_w_planes* sizeof(int), compacted_wkernel_start.data(), 0, NULL, NULL);
+    
+    cl_mem d_compact_kernels = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            compacted_wkernels.size() * sizeof(float2), NULL, &status); 
+    status = clEnqueueWriteBuffer(queue, d_compact_kernels, CL_TRUE, 0,
+            compacted_wkernels.size() * sizeof(float2), compacted_wkernels.data(), 0, NULL, NULL);
 
     cl_float d_cellsize_rad = cellsize_rad;
     cl_float d_w_scale = w_scale;
-
-    cl_int d_grid_topLeft_x = TRIMMED_REGION_OFFSET_U;
-    cl_int d_grid_topLeft_y = TRIMMED_REGION_OFFSET_V;
-
+ 
     cl_int d_trimmed_grid_size = GRID_U;
     cl_int d_grid_size = grid_size;
-    num_cells = 2*GRID_U*GRID_V;
+
+//    cl_int d_grid_topLeft_x = TRIMMED_REGION_OFFSET_U;
+    //cl_int d_grid_topLeft_y = TRIMMED_REGION_OFFSET_V;
+    
+    cl_int d_boxTop_u = boxTop.u;
+    cl_int d_boxTop_v = boxTop.v;
+
+    cl_int d_tileWidth = tileWidth;
+    cl_int d_tileHeight = tileHeight;
+
+    cl_int d_numTiles_u = numTiles.u;
+    cl_int d_numTiles_v = numTiles.v;
+
+    cl_mem d_numPointsInTiles = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            numPointsInTiles.size() * sizeof(int), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_numPointsInTiles, CL_TRUE, 0,
+            numPointsInTiles.size() * sizeof(int), numPointsInTiles.data(), 0, NULL, NULL);
+
+    cl_mem d_offsetsPointsInTiles = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            offsetsPointsInTiles.size() * sizeof(int), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_offsetsPointsInTiles, CL_TRUE, 0,
+            offsetsPointsInTiles.size() * sizeof(int), offsetsPointsInTiles.data(), 0, NULL, NULL);
+
+    cl_mem d_bucket_uu = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            num_vis * sizeof(float), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_bucket_uu, CL_TRUE, 0,
+            num_vis* sizeof(float), bucket_uu.data(), 0, NULL, NULL);
+
+    cl_mem d_bucket_vv = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            num_vis * sizeof(float), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_bucket_vv, CL_TRUE, 0,
+            num_vis* sizeof(float), bucket_vv.data(), 0, NULL, NULL);
+
+    cl_mem d_bucket_ww = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            num_vis * sizeof(float), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_bucket_ww, CL_TRUE, 0,
+            num_vis* sizeof(float), bucket_ww.data(), 0, NULL, NULL);
+    
+    cl_mem d_bucket_vis = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            num_vis * sizeof(float2), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_bucket_vis, CL_TRUE, 0,
+            num_vis* sizeof(float2), bucket_vis.data(), 0, NULL, NULL);
+
+    cl_mem d_workQueue_pu = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            numTiles * sizeof(int), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_workQueue_pu, CL_TRUE, 0,
+            numTiles * sizeof(int), workQueue_pu.data(), 0, NULL, NULL);
+    
+    cl_mem d_workQueue_pv = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            numTiles * sizeof(int), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_workQueue_pv, CL_TRUE, 0,
+            numTiles * sizeof(int), workQueue_pv.data(), 0, NULL, NULL);
+
+    // copy data to device
+    int num_cells = 2*GRID_U*GRID_V;
     cl_mem d_vis_grid_trimmed_new = clCreateBuffer(context, CL_MEM_READ_WRITE,
             num_cells * sizeof(float), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
             num_cells* sizeof(float), vis_grid_trimmed_new, 0, NULL, NULL);
 
-    std::string binary_file = getBoardBinaryFile("gridding_kernels", device);
+   
+    // get binary file
+    std::string binary_file = getBoardBinaryFile("gridding_kernels_tile", device);
     printf("Using AOCX: %s\n", binary_file.c_str());
     program = createProgramFromBinary(context, binary_file.c_str(), &device, 1);
 
@@ -924,69 +954,38 @@ void oskar_grid_wproj_fpga_f(
     printf("kernel compile error log: %s\n", buffer);
 
 
-    kernel = clCreateKernel(program, "oskar_grid_wproj_cl", &status);
+    kernel = clCreateKernel(program, "oskar_process_all_tiles", &status);
 
     int arg=0;
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_num_w_planes);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_support);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_oversample);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_conv_size_half);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_kernels);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_block_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_uu);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vv);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_ww);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_block);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_weight);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_compact_kernels_start);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_compact_kernels);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cellsize_rad);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_x);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_y);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
-
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_num_w_planes);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_support);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_oversample);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_conv_size_half);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_kernels);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_block_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_uu);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vv);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_ww);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_block);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_weight);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cellsize_rad);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_x);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_y);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_boxTop_u);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_boxTop_v);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_tileWidth);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_tileHeight);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_numTiles_u);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_numTiles_v);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_numPointsInTiles);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_offsetsPointsInTiles);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_uu);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_vv);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_ww);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_vis);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pu);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pv);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
 
     printf("finished init opencl\n");
     /*===================================================================*/
     /* End init OpenCL */
     /*===================================================================*/
-    
-    num_cells = num_times_baselines;
-    status = clEnqueueWriteBuffer(queue, d_uu, CL_TRUE, 0,
-            num_cells* sizeof(float), (float*) uu, 0, NULL, NULL);
-
-    status = clEnqueueWriteBuffer(queue, d_vv, CL_TRUE, 0,
-            num_cells* sizeof(float), (float*) vv, 0, NULL, NULL);
-
-    status = clEnqueueWriteBuffer(queue, d_ww, CL_TRUE, 0,
-            num_cells* sizeof(float), ww, 0, NULL, NULL);
-
-    num_cells = 2*num_times_baselines;
-    status = clEnqueueWriteBuffer(queue, d_vis_block, CL_TRUE, 0,
-            num_cells* sizeof(float), vis_block, 0, NULL, NULL);
-
-    num_cells = num_times_baselines;
-    status = clEnqueueWriteBuffer(queue, d_weight, CL_TRUE, 0,
-            num_cells* sizeof(float), weight, 0, NULL, NULL);
 
 
 
