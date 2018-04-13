@@ -817,7 +817,7 @@ void oskar_grid_wproj_fpga_f(
     platform = findPlatform("Intel");
     if(platform == NULL) {
         printf("ERROR: Unable to find Intel(R) FPGA OpenCL platform.\n");
-        return false;
+        return;
     }
     // Query the available OpenCL devices.
     scoped_array<cl_device_id> devices;
