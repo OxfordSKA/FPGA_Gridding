@@ -927,12 +927,17 @@ void oskar_grid_wproj_fpga_f(
     status = clEnqueueWriteBuffer(queue, d_workQueue_pv, CL_TRUE, 0,
             numTiles * sizeof(int), workQueue_pv.data(), 0, NULL, NULL);
 
-    // copy data to device
-    int num_cells = 2*GRID_U*GRID_V;
+    /*int num_cells = GRID_U*GRID_V;
     cl_mem d_vis_grid_trimmed_new = clCreateBuffer(context, CL_MEM_READ_WRITE,
             num_cells * sizeof(float), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
             num_cells* sizeof(float), vis_grid_trimmed_new, 0, NULL, NULL);
+    */
+    int num_cells = 2*grid_size*grid_size;
+    cl_mem d_vis_grid_new = clCreateBuffer(context, CL_MEM_READ_WRITE,
+            num_cells * sizeof(float), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
+            num_cells* sizeof(float), vis_grid_new, 0, NULL, NULL);
 
    
     // get binary file
@@ -980,7 +985,7 @@ void oskar_grid_wproj_fpga_f(
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_vis);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pu);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pv);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_new);
 
     printf("finished init opencl\n");
     /*===================================================================*/
