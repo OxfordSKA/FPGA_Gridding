@@ -120,6 +120,7 @@ void oskar_bucket_sort_layered(
       std::vector<float> & bucket_weight
       );
 
+/*
 // Process the Tiles outside of the central box.
 void oskar_process_all_tiles(
        const int num_w_planes,
@@ -144,6 +145,7 @@ void oskar_process_all_tiles(
        double* norm,
        float* grid
        );
+*/
 
 // Compact the wkernels so that only the values for the wsupport of each kernel level are stored,
 // rather than storing all kernels with max(wsupport) elements. Also reorder and copy the elements of
@@ -158,7 +160,7 @@ void compact_oversample_wkernels(
       std::vector<int>   &compacted_oversampled_wkernel_start_idx
       );
 
-/*
+
 void oskar_grid_wproj_fpga_f(
     const int num_w_planes,
     const int* support,
@@ -178,4 +180,3 @@ void oskar_grid_wproj_fpga_f(
     double* norm,
     float* grid
     );
-*/

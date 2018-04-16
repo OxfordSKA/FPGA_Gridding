@@ -32,6 +32,7 @@
 #include "oskar_grid_weights.h"
 #include "oskar_grid_wproj.h"
 #include "oskar_grid_wproj_fpga.hpp"
+#include "oskar_grid_wproj_cpu.hpp"
 #include "read_kernel.h"
 #include "read_vis.h"
 #include "write_fits_cube.h"
@@ -272,7 +273,7 @@ int main(int argc, char** argv)
                 OSKAR_VIS_BLOCK_TAG_DIM_START_AND_SIZE, i,
                 INT*6, dim_start_and_size, &status);
         const int num_times = dim_start_and_size[2];
-        //int block_size = num_times * num_baselines;
+        int block_size = num_times * num_baselines;
 
         /* Read the visibility data. */
         oskar_binary_read(h, vis_type,
@@ -332,7 +333,7 @@ int main(int argc, char** argv)
         /* Update the reference visibility grid. */
         printf("running reference version\n");
         oskar_timer_resume(tmr_grid_vis_orig);
-        oskar_grid_wproj_f(
+        oskar_grid_wproj_cpu_f(
                 (size_t) num_w_planes,
                 support,
                 oversample,
@@ -356,11 +357,6 @@ int main(int argc, char** argv)
     /* Close the visibility data file. */
     oskar_binary_free(h);
 
-    // Read back buffers
-
-    num_cells = 2*GRID_U*GRID_V;
-    status = clEnqueueReadBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0, 
-            num_cells * sizeof(float), vis_grid_trimmed_new, 0, NULL, NULL);
 /*
     // Copy trimmed grid back to full grid -- won't be done in final version when we have more than
     // 2GB available on device
@@ -450,18 +446,7 @@ int main(int argc, char** argv)
     free(vis_grid_orig);
     free(vis_grid_new);
     free(weights_grid);
-    if(kernel) {
-        clReleaseKernel(kernel);
-    }
-    if(program) {
-        clReleaseProgram(program);
-    }
-    if(queue) {
-        clReleaseCommandQueue(queue);
-    }
-    if(context) {
-        clReleaseContext(context);
-    }
+    
     /* Report timing. */
     printf("Gridding visibilities took %.3f seconds (original version)\n",
             oskar_timer_elapsed(tmr_grid_vis_orig));

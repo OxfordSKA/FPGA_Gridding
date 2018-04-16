@@ -65,6 +65,7 @@ set(read_vis_SRC
     utils/write_fits_cube.c
     oskar_grid_wproj.c
     oskar_grid_wproj_fpga.cpp
+    oskar_grid_wproj_cpu.cpp
     AOCL_UTILS/opencl.cpp
     AOCL_UTILS/options.cpp
     main.cpp

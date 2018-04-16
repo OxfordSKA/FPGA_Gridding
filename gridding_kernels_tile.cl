@@ -2,36 +2,37 @@
 
 __attribute__((max_global_work_dim(0)))
 __kernel void oskar_process_all_tiles(
-       const int num_w_planes,
+       int num_w_planes,
        __global const int* support,
-       const int oversample, 
+       int oversample, 
        __global const int* compact_wkernel_start, 
        __global const float2* compact_wkernel,
-       const double cell_size_rad,
-       const double w_scale,
-       const int grid_size,
+       float cell_size_rad,
+       float w_scale,
+       int grid_size,
        int boxTop_u, int boxTop_v,
-       const int tileWidth,
-       const int tileHeight,
+       int tileWidth,
+       int tileHeight,
        int numTiles_u, int numTiles_v,
        __global const int* numPointsInTiles,
        __global const int* offsetsPointsInTiles,
-       __global const float* bucket_uu,
-       __global const float* bucket_vv,
-       __global const float* bucket_ww,
-       __global const float2* bucket_vis,
-       __global const int *workQueue_pu, 
-       __global const int *workQueue_pv,
+       __global float* bucket_uu,
+       __global float* bucket_vv,
+       __global float* bucket_ww,
+       __global float2* bucket_vis,
+       __global int *workQueue_pu, 
+       __global int *workQueue_pv,
        __global float* grid
        )
 {
-
+#if 1
   const int g_centre = grid_size / 2;
   const double scale = grid_size * cell_size_rad;
 
   const int nTiles = numTiles_u * numTiles_v;
 
   double norm = 0.0;
+  int num_skipped = 0;
 
 #define NUM_POINTS_IN_TILES(uu, vv)  numPointsInTiles[( (uu) + (vv)*numTiles_u)]
 #define OFFSETS_IN_TILES(uu, vv)     offsetsPointsInTiles[( (uu) + (vv)*numTiles_u)]
@@ -73,6 +74,14 @@ __kernel void oskar_process_all_tiles(
 
       const int wsupport = support[grid_w];
 
+        if (grid_u + wsupport >= grid_size || grid_u - wsupport < 0 ||
+                grid_v + wsupport >= grid_size || grid_v - wsupport < 0)
+        {
+            num_skipped += 1;
+            continue;
+        }        
+
+
       // Scaled distance from nearest grid point.
       const int off_u = (int)round( (round(pos_u)-pos_u) * oversample);   // \in [-oversample/2, oversample/2]
       const int off_v = (int)round( (round(pos_v)-pos_v) * oversample);    // \in [-oversample/2, oversample/2]
@@ -90,7 +99,8 @@ __kernel void oskar_process_all_tiles(
       // for -wsupport <= k <= wsupport and 
       //       grid_v + j
       // for -wsupport <= j <= wsupport
-      const int tile_u[] = {boxTop_u + pu*tileWidth, boxTop_u + (pu+1)*tileWidth-1};
+
+              const int tile_u[] = {boxTop_u + pu*tileWidth, boxTop_u + (pu+1)*tileWidth-1};
       const int tile_v[] = {boxTop_v + pv*tileHeight, boxTop_v + (pv+1)*tileHeight-1};
 
       const int kstart = MAX(tile_u[0]-grid_u, -wsupport);
@@ -137,6 +147,8 @@ __kernel void oskar_process_all_tiles(
 
 #undef NUM_POINTS_IN_TILES
 #undef OFFSETS_IN_TILES
+
+#endif
 }
 
 

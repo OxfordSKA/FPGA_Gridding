@@ -632,7 +632,7 @@ void oskar_grid_wproj_fpga_f(
 	const int oversample, 
 	const int conv_size_half,
 	const float* conv_func, 
-	const int num_vis,
+	const int num_vis_total,
 	const float* uu, 
 	const float* vv,
 	const float* ww, 
@@ -646,6 +646,8 @@ void oskar_grid_wproj_fpga_f(
 	float* grid
 	)
 {
+  int num_vis = num_vis_total/100;
+printf("num_vis: %d\n", num_vis);
 
   std::vector<int> compacted_wkernel_start;
   std::vector<float2> compacted_wkernels;
@@ -810,7 +812,7 @@ void oskar_grid_wproj_fpga_f(
     static cl_kernel kernel = NULL;
     static cl_program program = NULL;
 
-    cl_int cl_status;
+    cl_int status;
     size_t valueSize;
     cl_uint num_platforms, num_devices;
 
@@ -847,8 +849,9 @@ void oskar_grid_wproj_fpga_f(
     context = clCreateContext( NULL, 1, &device, NULL, NULL, &status);
     queue = clCreateCommandQueue(context, device, 0, &status);
 
-    //num_times_baselines = 100000;
-    int block_size = num_times_baselines;
+    cl_uint param_value;
+    clGetDeviceInfo(device, CL_DEVICE_MAX_CONSTANT_ARGS, sizeof(cl_uint), &param_value, NULL);
+    printf("max constant args %d\n", param_value);
 
     // FPGA GLOBAL MEMORY
     // create openCL mem buffers for each data structure 
@@ -872,7 +875,7 @@ void oskar_grid_wproj_fpga_f(
     status = clEnqueueWriteBuffer(queue, d_compact_kernels, CL_TRUE, 0,
             compacted_wkernels.size() * sizeof(float2), compacted_wkernels.data(), 0, NULL, NULL);
 
-    cl_float d_cellsize_rad = cellsize_rad;
+    cl_float d_cell_size_rad = cell_size_rad;
     cl_float d_w_scale = w_scale;
  
     //cl_int d_trimmed_grid_size = GRID_U;
@@ -902,24 +905,24 @@ void oskar_grid_wproj_fpga_f(
             offsetsPointsInTiles.size() * sizeof(int), offsetsPointsInTiles.data(), 0, NULL, NULL);
 
     cl_mem d_bucket_uu = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_vis * sizeof(float), NULL, &status);
+            totalVisibilities * sizeof(float), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_bucket_uu, CL_TRUE, 0,
-            num_vis* sizeof(float), bucket_uu.data(), 0, NULL, NULL);
+            totalVisibilities* sizeof(float), bucket_uu.data(), 0, NULL, NULL);
 
     cl_mem d_bucket_vv = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_vis * sizeof(float), NULL, &status);
+            totalVisibilities * sizeof(float), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_bucket_vv, CL_TRUE, 0,
-            num_vis* sizeof(float), bucket_vv.data(), 0, NULL, NULL);
+            totalVisibilities* sizeof(float), bucket_vv.data(), 0, NULL, NULL);
 
     cl_mem d_bucket_ww = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_vis * sizeof(float), NULL, &status);
+            totalVisibilities * sizeof(float), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_bucket_ww, CL_TRUE, 0,
-            num_vis* sizeof(float), bucket_ww.data(), 0, NULL, NULL);
+            totalVisibilities* sizeof(float), bucket_ww.data(), 0, NULL, NULL);
     
     cl_mem d_bucket_vis = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            num_vis * sizeof(float2), NULL, &status);
+            totalVisibilities * sizeof(float2), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_bucket_vis, CL_TRUE, 0,
-            num_vis* sizeof(float2), bucket_vis.data(), 0, NULL, NULL);
+            totalVisibilities* sizeof(float2), bucket_vis.data(), 0, NULL, NULL);
 
     cl_mem d_workQueue_pu = clCreateBuffer(context, CL_MEM_READ_ONLY,
             numTiles.u*numTiles.v * sizeof(int), NULL, &status);
@@ -971,9 +974,9 @@ void oskar_grid_wproj_fpga_f(
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_oversample);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_compact_kernels_start);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_compact_kernels);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cellsize_rad);
+
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cell_size_rad);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_boxTop_u);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_boxTop_v);
@@ -1039,6 +1042,20 @@ void oskar_grid_wproj_fpga_f(
   //time2 = omp_get_wtime() - time1;
 
   //printf("Total time excluding compacting: %f seconds\n", time2);
+  
+    // free memory
+    if(kernel) {
+        clReleaseKernel(kernel);
+    }
+    if(program) {
+        clReleaseProgram(program);
+    }
+    if(queue) {
+        clReleaseCommandQueue(queue);
+    }
+    if(context) {
+        clReleaseContext(context);
+    }
 
 
   return;
