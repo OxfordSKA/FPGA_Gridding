@@ -26,6 +26,7 @@
 
 #include "oskar_grid_wproj_fpga.hpp"
 
+using namespace aocl_utils;
 
 // How to sort Tiles by the number of visibilities they contain.
 bool sortTilesByVis(Tile a, Tile b) { return a.vis > b.vis; }
