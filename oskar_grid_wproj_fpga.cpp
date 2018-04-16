@@ -874,7 +874,8 @@ void oskar_grid_wproj_fpga_f(
     cl_float d_cellsize_rad = cellsize_rad;
     cl_float d_w_scale = w_scale;
  
-    cl_int d_trimmed_grid_size = GRID_U;
+    //cl_int d_trimmed_grid_size = GRID_U;
+    cl_int d_trimmed_grid_size = 10; /// *********************
     cl_int d_grid_size = grid_size;
 
 //    cl_int d_grid_topLeft_x = TRIMMED_REGION_OFFSET_U;
@@ -920,14 +921,14 @@ void oskar_grid_wproj_fpga_f(
             num_vis* sizeof(float2), bucket_vis.data(), 0, NULL, NULL);
 
     cl_mem d_workQueue_pu = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            numTiles * sizeof(int), NULL, &status);
+            numTiles.u*numTiles.v * sizeof(int), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_workQueue_pu, CL_TRUE, 0,
-            numTiles * sizeof(int), workQueue_pu.data(), 0, NULL, NULL);
+            numTiles.u*numTiles.v * sizeof(int), workQueue_pu.data(), 0, NULL, NULL);
     
     cl_mem d_workQueue_pv = clCreateBuffer(context, CL_MEM_READ_ONLY,
-            numTiles * sizeof(int), NULL, &status);
+            numTiles.u*numTiles.v * sizeof(int), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_workQueue_pv, CL_TRUE, 0,
-            numTiles * sizeof(int), workQueue_pv.data(), 0, NULL, NULL);
+            numTiles.u*numTiles.v * sizeof(int), workQueue_pv.data(), 0, NULL, NULL);
 
     /*int num_cells = GRID_U*GRID_V;
     cl_mem d_vis_grid_trimmed_new = clCreateBuffer(context, CL_MEM_READ_WRITE,
@@ -1030,8 +1031,8 @@ void oskar_grid_wproj_fpga_f(
 
     // Read back buffers
     //num_cells = 2*GRID_U*GRID_V;
-    int num_cells = 2*grid_size*grid_size;
-    status = clEnqueueReadBuffer(queue, d_vis_new, CL_TRUE, 0,
+    num_cells = 2*grid_size*grid_size;
+    status = clEnqueueReadBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
             num_cells * sizeof(float), grid, 0, NULL, NULL);
 
   //time2 = omp_get_wtime() - time1;
