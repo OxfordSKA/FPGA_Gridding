@@ -690,11 +690,10 @@ printf("num_vis: %d\n", num_vis);
   //time4 = omp_get_wtime() - time3;
   //printf("Finding grid hit box time: %fms\n",time4*1000);
 
-  const float factor = 0.0f;
-  int len_u = int( factor*(botRight.u - topLeft.u) );
-  int len_v = int( factor*(botRight.v - topLeft.v) );
-  Point boxTop( topLeft.u + len_u, topLeft.v + len_v );
-  Point boxBot( botRight.u - len_u, botRight.v - len_v );
+  int len_u = int( (botRight.u - topLeft.u) );
+  int len_v = int( (botRight.v - topLeft.v) );
+  Point boxTop( topLeft.u, topLeft.v);
+  Point boxBot( botRight.u, botRight.v);
      
   // We now fix our Tile size. This is a tunable parameter.
   const int tileWidth = 64;
@@ -937,6 +936,7 @@ printf("num_vis: %d\n", num_vis);
     std::fill(vis_grid_trimmed_new.begin(), vis_grid_trimmed_new.end(), 0);
 
     int num_cells = 2*len_u*len_v;
+    printf("len: (%d %d)\n", len_u, len_v);
     cl_mem d_vis_grid_trimmed_new = clCreateBuffer(context, CL_MEM_READ_WRITE,
             num_cells * sizeof(float), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
@@ -969,9 +969,9 @@ printf("num_vis: %d\n", num_vis);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_oversample);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_compact_kernels_start);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_compact_kernels);
-
     status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cell_size_rad);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_boxTop_u);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_boxTop_v);
@@ -1000,7 +1000,6 @@ printf("num_vis: %d\n", num_vis);
 
   
   // Check we actually have some work to do.
-  // If we've set factor = 1 then there won't be any....
   if(numTiles.u > 0 && numTiles.v > 0) 
     {
         // Process the whole grid on FPGA
@@ -1034,13 +1033,15 @@ printf("num_vis: %d\n", num_vis);
     status = clEnqueueReadBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
             num_cells * sizeof(float), vis_grid_trimmed_new.data(), 0, NULL, NULL);
 
+    printf("received grid: %f\n", vis_grid_trimmed_new[0]);
+
     // Copy trimmed grid back to full grid -- won't be done in final version when we have more than
     // 2GB available on device
 	int gridOutOffset = boxTop.v*grid_size*2 + boxTop.u*2;
     for (int v=0; v<len_v; v++){
         for (int u=0; u<len_u; u++){
-            (grid)[gridOutOffset + v*grid_size*2 + u*2] = (vis_grid_trimmed_new)[(v*len_u+u)*2];
-            (grid)[gridOutOffset + v*grid_size*2 + u*2 +1] = (vis_grid_trimmed_new)[(v*len_u+u)*2 + 1];
+            grid[gridOutOffset + v*grid_size*2 + u*2] = vis_grid_trimmed_new[(v*len_u+u)*2];
+            grid[gridOutOffset + v*grid_size*2 + u*2 +1] = vis_grid_trimmed_new[(v*len_u+u)*2 + 1];
         }
     }
 

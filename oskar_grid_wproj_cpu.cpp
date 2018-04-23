@@ -62,6 +62,7 @@ void oskar_process_all_tiles_cpu(
   const int nTiles = numTiles_u * numTiles_v;
 
   double local_norm = 0.0;
+  int num_skipped = 0;
   
 #define NUM_POINTS_IN_TILES(uu, vv)  numPointsInTiles[( (uu) + (vv)*numTiles_u)]
 #define OFFSETS_IN_TILES(uu, vv)     offsetsPointsInTiles[( (uu) + (vv)*numTiles_u)]
@@ -97,9 +98,16 @@ int pu = workQueue_pu[tile];
       const int grid_v = (int)round(pos_v) + g_centre;
       int grid_w = (int)round(sqrt(fabs(ww_i * w_scale)));
       if(grid_w >= num_w_planes) grid_w = num_w_planes - 1;
-     
+
       const int wsupport = support[grid_w];
 
+      if (grid_u + wsupport >= grid_size || grid_u - wsupport < 0 ||
+                grid_v + wsupport >= grid_size || grid_v - wsupport < 0)
+      {
+        num_skipped += 1;
+        continue; //TODO: Is this the best way to break the rest of loop?
+      }
+      
       // Scaled distance from nearest grid point.
       const int off_u = (int)round( (round(pos_u)-pos_u) * oversample);   // \in [-oversample/2, oversample/2]
       const int off_v = (int)round( (round(pos_v)-pos_v) * oversample);    // \in [-oversample/2, oversample/2]
