@@ -9,6 +9,7 @@ __kernel void oskar_process_all_tiles(
        __global const float2* compact_wkernel,
        float cell_size_rad,
        float w_scale,
+       int trimmed_grid_size,
        int grid_size,
        int boxTop_u, int boxTop_v,
        int tileWidth,
@@ -67,8 +68,8 @@ __kernel void oskar_process_all_tiles(
       val.x *= w;
       val.y *= w;
 
-      const int grid_u = (int)round(pos_u) + g_centre;
-      const int grid_v = (int)round(pos_v) + g_centre;
+      const int grid_u = (int)round(pos_u) + g_centre - boxTop_u;
+      const int grid_v = (int)round(pos_v) + g_centre - boxTop_v;
       int grid_w = (int)round(sqrt(fabs(ww_i * w_scale)));
       if(grid_w >= num_w_planes) grid_w = num_w_planes - 1;
 

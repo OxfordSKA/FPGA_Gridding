@@ -878,8 +878,7 @@ printf("num_vis: %d\n", num_vis);
     cl_float d_cell_size_rad = cell_size_rad;
     cl_float d_w_scale = w_scale;
  
-    //cl_int d_trimmed_grid_size = GRID_U;
-    cl_int d_trimmed_grid_size = 10; /// *********************
+    cl_int d_trimmed_grid_size = len_u; 
     cl_int d_grid_size = grid_size;
 
 //    cl_int d_grid_topLeft_x = TRIMMED_REGION_OFFSET_U;
@@ -934,18 +933,14 @@ printf("num_vis: %d\n", num_vis);
     status = clEnqueueWriteBuffer(queue, d_workQueue_pv, CL_TRUE, 0,
             numTiles.u*numTiles.v * sizeof(int), workQueue_pv.data(), 0, NULL, NULL);
 
-    /*int num_cells = GRID_U*GRID_V;
+    std::vector<float> vis_grid_trimmed_new(2*len_u*len_v);
+    std::fill(vis_grid_trimmed_new.begin(), vis_grid_trimmed_new.end(), 0);
+
+    int num_cells = 2*len_u*len_v;
     cl_mem d_vis_grid_trimmed_new = clCreateBuffer(context, CL_MEM_READ_WRITE,
             num_cells * sizeof(float), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
-            num_cells* sizeof(float), vis_grid_trimmed_new, 0, NULL, NULL);
-    */
-    int num_cells = 2*grid_size*grid_size;
-    cl_mem d_vis_grid_new = clCreateBuffer(context, CL_MEM_READ_WRITE,
-            num_cells * sizeof(float), NULL, &status);
-    status = clEnqueueWriteBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
-            num_cells* sizeof(float), grid, 0, NULL, NULL);
-
+            num_cells * sizeof(float), vis_grid_trimmed_new.data(), 0, NULL, NULL);
    
     // get binary file
     std::string binary_file = getBoardBinaryFile("gridding_kernels_tile", device);
@@ -992,7 +987,7 @@ printf("num_vis: %d\n", num_vis);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_vis);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pu);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pv);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_new);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
 
     printf("finished init opencl\n");
     /*===================================================================*/
@@ -1035,9 +1030,19 @@ printf("num_vis: %d\n", num_vis);
 
     // Read back buffers
     //num_cells = 2*GRID_U*GRID_V;
-    num_cells = 2*grid_size*grid_size;
-    status = clEnqueueReadBuffer(queue, d_vis_grid_new, CL_TRUE, 0,
-            num_cells * sizeof(float), grid, 0, NULL, NULL);
+    num_cells = 2*len_u*len_v;
+    status = clEnqueueReadBuffer(queue, d_vis_grid_trimmed_new, CL_TRUE, 0,
+            num_cells * sizeof(float), vis_grid_trimmed_new.data(), 0, NULL, NULL);
+
+    // Copy trimmed grid back to full grid -- won't be done in final version when we have more than
+    // 2GB available on device
+	int gridOutOffset = boxTop.v*grid_size*2 + boxTop.u*2;
+    for (int v=0; v<len_v; v++){
+        for (int u=0; u<len_u; u++){
+            (grid)[gridOutOffset + v*grid_size*2 + u*2] = (vis_grid_trimmed_new)[(v*len_u+u)*2];
+            (grid)[gridOutOffset + v*grid_size*2 + u*2 +1] = (vis_grid_trimmed_new)[(v*len_u+u)*2 + 1];
+        }
+    }
 
   //time2 = omp_get_wtime() - time1;
 
