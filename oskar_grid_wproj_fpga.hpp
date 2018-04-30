@@ -8,6 +8,7 @@
 #pragma once
 
 #include <vector>
+#pragma OPENCL EXTENSION cl_altera_channels : enable  //you need this
 
 // We are dealing with Complex numbers, so define a struct that associates
 // 2 floats together (as an alternative to a Complex class).
@@ -41,6 +42,31 @@ struct Tile {
   int pv;
   int vis;
 };
+
+struct ChDataConvEngConfig{       // Fix -- might want to send these through per vis, instead of grid_w
+    __global float2* restrict compact_wkernel;
+    int oversample;
+}
+
+struct ChDataTileConfig {
+    __global float* restrict grid_pointer;
+    int num_tile_vis;
+    uchar is_final;
+}
+
+struct ChDataVis {
+    int compact_start_index, grid_local_u, grid_local_v;
+    int oversample_off_u, oversample_off_v;
+    int jstart, jend, kstart, kend;
+    int wsupport;
+    int conv_mul;
+    float2 val;
+}
+
+channel struct ChDataConvEngConfig chConvEngConfig __attribute__((depth(1)));
+channel struct ChDataTileConfig chTileConfig__attribute__((depth(1)));
+channel struct ChDataVis chVis __attribute__((depth(8)));
+channel uchar ChDataConvEngFinished chConvEngFinished __attribute__((depth(1)));
 
 // How to sort Tiles by the number of visibilities they contain.
 bool sortTilesByVis(
