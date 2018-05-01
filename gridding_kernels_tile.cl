@@ -1,4 +1,30 @@
-#include "oksar_grid_wproj_fpga.hpp"
+#pragma OPENCL EXTENSION cl_altera_channels : enable  //you need this
+
+struct ChDataConvEngConfig{       // Fix -- might want to send these through per vis, instead of grid_w
+    __global const float2* restrict compact_wkernel;
+    int tileHeight, tileWidth;
+    int trimmed_grid_size;
+};
+
+struct ChDataTileConfig {
+    __global float2* restrict grid_pointer;
+    int num_tile_vis;
+    uchar is_final;
+};
+
+struct ChDataVis {
+    int compact_start_index, grid_local_u, grid_local_v;
+    int oversample_off_u, oversample_off_v;
+    int jstart, jend, kstart, kend;
+    int wsupport;
+    int conv_mul;
+    float2 val;
+};
+
+channel struct ChDataConvEngConfig chConvEngConfig __attribute__((depth(1)));
+channel struct ChDataTileConfig chTileConfig __attribute__((depth(1)));
+channel struct ChDataVis chVis __attribute__((depth(8)));
+channel uchar chConvEngFinished __attribute__((depth(1)));
 
 __attribute__((max_global_work_dim(0)))
 __kernel void oskar_process_all_tiles(
@@ -43,6 +69,9 @@ __kernel void oskar_process_all_tiles(
 
     struct ChDataConvEngConfig conv_eng_config;
     conv_eng_config.compact_wkernel = compact_wkernel;
+    conv_eng_config.tileHeight = tileHeight;
+    conv_eng_config.tileWidth = tileWidth;
+    conv_eng_config.trimmed_grid_size = trimmed_grid_size;
     write_channel_intel(chConvEngConfig, conv_eng_config);
 
     // Loop over the Tiles.
@@ -55,12 +84,13 @@ __kernel void oskar_process_all_tiles(
         int tileTopLeft_u = pu*tileWidth;
         int tileTopLeft_v = pv*tileHeight;
         int tileOffset = tileTopLeft_v*trimmed_grid_size + tileTopLeft_u;
+        //printf("pu: %d, pv: %d, tileOffset: %d\n", pu, pv, tileOffset);
 		
         const int off = OFFSETS_IN_TILES(pu, pv);
 		const int num_tile_vis = NUM_POINTS_IN_TILES(pu,pv);
 
         struct ChDataTileConfig tile_config;
-        tile_config.grid_pointer = (__global float2 *restrict)&grid[tileOffset];
+        tile_config.grid_pointer = (__global float2 *restrict)&grid[tileOffset*2];
         tile_config.num_tile_vis = num_tile_vis;
         tile_config.is_final = 0;
         if (tile==nTiles-1) tile_config.is_final = 1;
@@ -163,20 +193,25 @@ __kernel void convEng()
 
     struct ChDataConvEngConfig conv_eng_config;
     conv_eng_config = read_channel_intel(chConvEngConfig);
-    float2 *compact_wkernel = conv_eng_config.compact_wkernel;
+    int tileHeight = conv_eng_config.tileHeight;
+    int tileWidth = conv_eng_config.tileWidth;
+    int trimmed_grid_size = conv_eng_config.trimmed_grid_size;
+    __global float2* restrict compact_wkernel = (__global float2* restrict)conv_eng_config.compact_wkernel;
 
+    
+    int count=0;
     while(1){
         // Iterate over tiles
         struct ChDataTileConfig tile_config;
         tile_config = read_channel_intel(chTileConfig); 
 
+        //printf("count: %d, numVis: %d\n", count++, tile_config.num_tile_vis);
         // Copy global grid to grid_local
         __global float2 *restrict grid_pointer;
-        grid_pointer = tile_config.grid_pointer;
         for (int y=0; y<tileHeight; y++){
             for (int x=0; x<tileWidth; x++){
                 //! fix -- is this cast still required?
-                grid_pointer = (__global float2 *restrict)&grid_pointer[(y*trimmed_grid_size + x)*2];
+                grid_pointer = (__global float2 *restrict)&tile_config.grid_pointer[y*trimmed_grid_size + x];
                 grid_local[y][x] = *grid_pointer;
             }
         }
@@ -205,8 +240,8 @@ __kernel void convEng()
             const int jend   = vis.jend;
 
             const int wsupport = vis.wsupport;
-            off_u = vis.oversample_off_u;
-            off_v = vis.oversample_off_v;
+            int off_u = vis.oversample_off_u;
+            int off_v = vis.oversample_off_v;
 
             int u_fac = 0, v_fac = 0;
             if (off_u >= 0) u_fac = 1;
@@ -225,7 +260,7 @@ __kernel void convEng()
                     //int p = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + (j*v_fac + wsupport)*(2*wsupport + 1) + k*u_fac + wsupport;
                     //int p = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + wsupport*(2*wsupport + 1) + wsupport + k*u_fac + j*v_fac*(2*wsupport+1);
 
-                    int p = compact_start + j*v_fac*(2*wsupport+1) + k*u_fac;
+                    int p = compact_start_index + j*v_fac*(2*wsupport+1) + k*u_fac;
 
                     float2 c = compact_wkernel[p];
                     c.y *= conv_mul;
@@ -240,18 +275,17 @@ __kernel void convEng()
                         (float2) ((val.x * c.x - val.y * c.y), (val.y * c.x + val.x * c.y));
                 }
             }
-            norm += sum * w;
+            //norm += sum * w;
 
             
         } // END loop over vis in tile
 
         // put the grid back
-        grid_pointer = tile_config.grid_pointer;
         for (int y=0; y<tileHeight; y++){
             for (int x=0; x<tileWidth; x++){
                 //! fix -- is this cast still required?
-                grid_pointer = (__global float2 *restrict)&grid_pointer[(y*trimmed_grid_size + x)*2];
-                *grid_pointer = *grid_pointer;
+                grid_pointer = (__global float2 *restrict)&tile_config.grid_pointer[y*trimmed_grid_size + x];
+                *grid_pointer = grid_local[y][x];
             }
         }
 
