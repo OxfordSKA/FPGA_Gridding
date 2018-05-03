@@ -7,6 +7,11 @@
     C[i] = A[i] + B[i];
 }
 */
+
+#ifndef EMULATOR
+#define EMULATOR 0
+#endif
+
 __attribute__((max_global_work_dim(0)))
 __kernel void oskar_grid_wproj_cl(
         int num_w_planes,
@@ -28,7 +33,6 @@ __kernel void oskar_grid_wproj_cl(
         __global float* restrict grid)
 {
 
-    printf("RUNNING KERNEL!\n");
 
     int i;
     const int kernel_dim = conv_size_half * conv_size_half;
@@ -43,7 +47,10 @@ __kernel void oskar_grid_wproj_cl(
     //for (i = 0; i < num_points; ++i)
     for (i = 0; i < 100000; ++i)
     {
-    	if ((i%1000) == 0) printf("i: %d\n", i);
+        #if EMULATOR > 0
+            if ((i%1000) == 0) printf("i: %d\n", i);
+        #endif
+
         double sum = 0.0;
         int j, k;
 

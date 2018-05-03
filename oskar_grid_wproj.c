@@ -154,14 +154,6 @@ void oskar_grid_wproj_f(
     //for (i = 0; i < num_points; ++i)
     for (i = 0; i < 100000; ++i)
     {
-    	if ((i%1000)==0) printf("i: %d\n", i);
-        /*
-        //if ((i%130816)!=120776) continue;
-        if ((i%130816)!=109571) continue;
-        //if ((i%130816)!=108953 && (i%130816)!=109367 && (i%130816)!=109368 && (i%130816)!=109574 && (i%130816)!=109571) continue;
-        if (i>=130816*90+120778) continue;
-        if (i<130816*85+120778) continue;
-        */
         double sum = 0.0;
         int j, k;
 
