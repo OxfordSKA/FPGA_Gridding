@@ -58,6 +58,7 @@ float2 grid_local[MAX_TILE_WIDTH][MAX_TILE_HEIGHT];
         int tileTopLeft_u = pu*tileWidth;
         int tileTopLeft_v = pv*tileHeight;
         int tileOffset = tileTopLeft_v*trimmed_grid_size + tileTopLeft_u;
+        //printf("pu: %d, pv: %d, tileOffset: %d\n", pu, pv, tileOffset);
         __global float2 *restrict grid_pointer;
         grid_pointer = (__global float2 *restrict)grid;
         for (int y=0; y<tileHeight; y++){

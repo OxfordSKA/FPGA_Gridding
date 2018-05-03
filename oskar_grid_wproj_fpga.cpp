@@ -646,7 +646,7 @@ void oskar_grid_wproj_fpga_f(
 	float* grid
 	)
 {
-  int num_vis = num_vis_total/100;
+  int num_vis = 100000;
 printf("num_vis: %d\n", num_vis);
 
   std::vector<int> compacted_wkernel_start;
@@ -1045,10 +1045,6 @@ printf("num_vis: %d\n", num_vis);
         }
     }
 
-  //time2 = omp_get_wtime() - time1;
-
-  //printf("Total time excluding compacting: %f seconds\n", time2);
-  
     // free memory
     if(kernel) {
         clReleaseKernel(kernel);
