@@ -33,7 +33,6 @@
 
 #endif
 
-
 #define FAKE_VIS_VALUES 0
 #define FAKE_KERNEL_VALUES 0
 
