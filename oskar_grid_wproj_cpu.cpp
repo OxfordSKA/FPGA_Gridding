@@ -195,7 +195,7 @@ void oskar_grid_wproj_cpu_f(
 	float* grid
 	)
 {
-    int num_vis = num_vis_total/100;
+    int num_vis = 100000;
 
   std::vector<int> compacted_wkernel_start;
   std::vector<float2> compacted_wkernels;
