@@ -27,8 +27,9 @@ __kernel void oskar_grid_wproj_cl(
         __global const float* restrict weight,
         const float cell_size_rad,
         const float w_scale,
+        const int trimmed_grid_size,
         const int grid_size,
-        const int grid_topLeft,
+        const int grid_topLeft_x, const int grid_topLeft_y,
         __global float* restrict grid)
 {
 	#if EMULATOR > 0
@@ -63,8 +64,8 @@ __kernel void oskar_grid_wproj_cl(
         const int grid_w = (int)round(sqrt(fabs(ww_i * w_scale)));
         //printf("grid_w: %d, ww_i %f\n", grid_w, ww_i);
         //const int grid_w = 2;
-        const int grid_u = (int)round(pos_u) + grid_centre;
-        const int grid_v = (int)round(pos_v) + grid_centre;
+        const int grid_u = (int)round(pos_u) + grid_centre - grid_topLeft_x;
+        const int grid_v = (int)round(pos_v) + grid_centre - grid_topLeft_y;
 
         /* Get visibility data. */
         // hard code weight value to 1.0
@@ -90,8 +91,8 @@ __kernel void oskar_grid_wproj_cl(
                 grid_w * kernel_dim : (num_w_planes - 1) * kernel_dim;
 
         /* Catch points that would lie outside the grid. */
-        if (grid_u + w_support >= grid_size || grid_u - w_support < 0 ||
-                grid_v + w_support >= grid_size || grid_v - w_support < 0)
+        if (grid_u + w_support >= trimmed_grid_size || grid_u - w_support < 0 ||
+                grid_v + w_support >= trimmed_grid_size || grid_v - w_support < 0)
         {
             num_skipped += 1;
             continue;
@@ -101,7 +102,7 @@ __kernel void oskar_grid_wproj_cl(
 		//local grid
 		for (char y= -w_support; y <= w_support; y++) {
 			for (char x = -w_support; x <= w_support; x++) {
-				grid_pointer = (__global float2 * restrict)&grid[((grid_v+y)*grid_size + (grid_u+x))*2];
+				grid_pointer = (__global float2 * restrict)&grid[((grid_v+y)*trimmed_grid_size + (grid_u+x))*2];
 				grid_local[y+w_support][x+w_support] = *grid_pointer;
 			}
 		}
@@ -111,7 +112,7 @@ __kernel void oskar_grid_wproj_cl(
         {
             int p1, t1;
             p1 = grid_v + j; //corner of the convolution kernel 
-            p1 *= grid_size; /* Tested to avoid int overflow. */
+            p1 *= trimmed_grid_size; /* Tested to avoid int overflow. */
             p1 += grid_u;
             t1 = abs(off_v + j * oversample);
             t1 *= conv_size_half;
@@ -136,7 +137,7 @@ __kernel void oskar_grid_wproj_cl(
         // put the grid back
 		for (char y= -w_support; y <= w_support; y++) {
 			for (char x = -w_support; x <= w_support; x++) {
-				grid_pointer = (__global float2 * restrict)&grid[((grid_v+y)*grid_size + (grid_u+x))*2];
+				grid_pointer = (__global float2 * restrict)&grid[((grid_v+y)*trimmed_grid_size + (grid_u+x))*2];
 				*grid_pointer = grid_local[y+w_support][x+w_support];
 			}
 		}        

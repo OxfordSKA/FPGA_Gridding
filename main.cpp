@@ -402,8 +402,9 @@ int main(int argc, char** argv)
     status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_x);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_topLeft_y);
+    printf("top left: %d, %d\n", d_grid_topLeft_x, d_grid_topLeft_y);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_grid_topLeft_x);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_grid_topLeft_y);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
 
     printf("finished init opencl\n");
