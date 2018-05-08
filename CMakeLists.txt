@@ -15,10 +15,9 @@ find_package(Threads REQUIRED)
 
 #! Find OpenCL
 find_package(OpenCL REQUIRED)
-INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
-set(AOCL_COMPILE_CONFIG "-I/opt/intelFPGA_pro/17.1/hld/host/include")
-set(AOCL_LINK_CONFIG "-L/opt/intelFPGA_pro/17.1/hld/board/a10_ref/linux64/lib -L/opt/intelFPGA_pro/17.1/hld/host/linux64/lib -Wl,--no-as-needed -lalteracl -laltera_a10_ref_mmd -lelf")
+set(AOCL_COMPILE_CONFIG "-I/usr/local/intelFPGA_pro/17.1/hld/host/include")
+set(AOCL_LINK_CONFIG "-L/usr/local/intelFPGA_pro/17.1/hld/board/a10_ref/linux64/lib -L/usr/local/intelFPGA_pro/17.1/hld/host/linux64/lib -Wl,--no-as-needed -lalteracl -laltera_a10_ref_mmd -lelf")
 
 #! Compiler flags.
 if ("${CMAKE_C_COMPILER_ID}" MATCHES ".*Clang.*"
@@ -50,6 +49,10 @@ include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/utils)
 include_directories(${PROJECT_SOURCE_DIR}/cfitsio-3.41)
 include_directories(${PROJECT_SOURCE_DIR}/AOCL_UTILS)
+INCLUDE_DIRECTORIES(${OpenCL_INCLUDE_DIR})
+
+message(status " include dir: " ${OpenCL_INCLUDE_DIR})
+
 set(read_vis_SRC
     # List of source files to compile.
     utils/check_value.c
@@ -60,9 +63,9 @@ set(read_vis_SRC
     utils/read_vis.c
     utils/write_fits_cube.c
     oskar_grid_wproj.c
-    main.cpp
     AOCL_UTILS/opencl.cpp
     AOCL_UTILS/options.cpp
+    main.cpp
 )
 add_executable(main ${read_vis_SRC})
 
