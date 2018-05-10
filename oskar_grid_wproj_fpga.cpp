@@ -647,6 +647,7 @@ void oskar_grid_wproj_fpga_f(
 	)
 {
   int num_vis = 100000;
+  //int num_vis = 1000;
 printf("num_vis: %d\n", num_vis);
 
   std::vector<int> compacted_wkernel_start;

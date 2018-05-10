@@ -165,6 +165,7 @@ __kernel void oskar_process_all_tiles(
     } // END loop over tiles
 
     uchar finished = read_channel_intel(chConvEngFinished);
+    printf("finished: %u\n", finished);
 
 
 #undef NUM_POINTS_IN_TILES
@@ -289,7 +290,10 @@ __kernel void convEng()
             }
         }
 
-        if (tile_config.is_final==1) write_channel_intel(chConvEngFinished, tile_config.is_final);
+        if (tile_config.is_final==1) {
+            write_channel_intel(chConvEngFinished, tile_config.is_final);
+            break;
+        }
     } // END loop over tiles
 
 
