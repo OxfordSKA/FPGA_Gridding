@@ -326,7 +326,10 @@ int main(int argc, char** argv)
     status = clEnqueueWriteBuffer(queue, d_kernels, CL_TRUE, 0,
             num_cells* sizeof(float), kernels, 0, NULL, NULL);
 
-    cl_int d_block_size = num_times_baselines;
+    //cl_int d_block_size = num_times_baselines;
+    int num_vis_processed = 100000;
+    printf("num vis processed %d\n", num_vis_processed);
+    cl_int d_block_size = num_vis_processed;
 
     num_cells = num_times_baselines;
     cl_mem d_uu = clCreateBuffer(context, CL_MEM_READ_ONLY, 
@@ -522,7 +525,7 @@ int main(int argc, char** argv)
                 oversample,
                 conv_size_half,
                 (const float*) kernels,
-                block_size,
+                num_vis_processed,
                 (const float*) uu,
                 (const float*) vv,
                 (const float*) ww,

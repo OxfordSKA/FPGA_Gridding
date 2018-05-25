@@ -1,0 +1,365 @@
+{
+  "columns":
+  ["", "Pipelined", "II", "Bottleneck", "Details"]
+  , "children":
+  [
+    {
+      "name":"Kernel: oskar_grid_wproj_cl"
+      , "data":
+      ["", "", ""]
+      , "debug":
+      [
+        [
+          {
+            "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+            , "line":34
+          }
+        ]
+      ]
+      , "details":
+      [
+        {
+          "type":"brief"
+          , "text":"Single work-item execution"
+        }
+        , {
+          "type":"text"
+          , "text":"Single work-item execution"
+        }
+        , {
+          "type":"text"
+          , "text":"See %L for more information"
+          , "links":
+          [
+            {
+              "guide":"Best Practices Guide : Kernels"
+              , "link":"https://www.altera.com/documentation/mwh1391807516407.html#ipp1476408832230"
+            }
+          ]
+        }
+      ]
+      , "children":
+      [
+        {
+          "name":"oskar_grid_wproj_cl.B1"
+          , "data":
+          ["No", "n/a", "n/a"]
+          , "debug":
+          [
+            [
+              {
+                "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                , "line":47
+              }
+            ]
+            , [
+              {
+                "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                , "line":47
+              }
+            ]
+          ]
+          , "details":
+          [
+            {
+              "type":"brief"
+              , "text":"Out-of-order inner loop"
+            }
+            , {
+              "type":"text"
+              , "text":"Loop not pipelined due to:"
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Loop iteration ordering: iterations of inner loop shown may get out of order with respect to the listed inner loop, as the number of iterations of the listed inner loop may be different for different iterations of this loop."
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"oskar_grid_wproj_cl.B2 (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                          , "line":"101"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"oskar_grid_wproj_cl.B3 (%L, %L, %L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                          , "line":"110"
+                        }
+                        , {
+                          "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                          , "line":"112"
+                        }
+                        , {
+                          "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                          , "line":"125"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"text"
+              , "text":"See %L for more information."
+              , "links":
+              [
+                {
+                  "guide":"Best Practices Guide : Loops in a Single Work-Item Kernel"
+                  , "link":"https://www.altera.com/documentation/mwh1391807516407.html#wfa1476380079940"
+                }
+              ]
+            }
+            , {
+              "type":"text"
+              , "text":"See %L for more information"
+              , "links":
+              [
+                {
+                  "guide":"Best Practices Guide : Nested Loops"
+                  , "link":"https://www.altera.com/documentation/mwh1391807516407.html#rfr1469543500580"
+                }
+              ]
+            }
+          ]
+          , "children":
+          [
+            {
+              "name":"oskar_grid_wproj_cl.B2"
+              , "data":
+              ["Yes", ">=1", "n/a"]
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                    , "line":101
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                    , "line":101
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Iteration executed serially across oskar_grid_wproj_cl.B3. Only a single loop iteration will execute inside this region due to memory dependency:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"From: Load Operation (%L, %L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                          , "line":"121"
+                        }
+                        , {
+                          "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                          , "line":"122"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"To: Store Operation (%L, %L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                          , "line":"121"
+                        }
+                        , {
+                          "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                          , "line":"122"
+                        }
+                      ]
+                    }
+                  ]
+                }
+                , {
+                  "type":"brief"
+                  , "text":"Serial exe: Memory dependency"
+                }
+                , {
+                  "type":"text"
+                  , "text":"See %L for more information"
+                  , "links":
+                  [
+                    {
+                      "guide":"Best Practices Guide : Nested Loops"
+                      , "link":"https://www.altera.com/documentation/mwh1391807516407.html#rfr1469543500580"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"oskar_grid_wproj_cl.B3"
+                  , "data":
+                  ["Yes", "~299", "II"]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":110
+                      }
+                    ]
+                    , [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":110
+                      }
+                    ]
+                    , [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":112
+                      }
+                    ]
+                    , [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":125
+                      }
+                    ]
+                  ]
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"Compiler failed to schedule this loop with smaller II due to memory dependency:"
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"From: Load Operation (%L, %L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                              , "line":"121"
+                            }
+                            , {
+                              "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                              , "line":"122"
+                            }
+                          ]
+                        }
+                        , {
+                          "type":"text"
+                          , "text":"To: Store Operation (%L, %L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                              , "line":"121"
+                            }
+                            , {
+                              "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                              , "line":"122"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"The critical path that prevented successful II = 298 scheduling:"
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"8.8 clock cycles Hardened Floating-point Dot Product of Size 2 Operation (%L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                              , "line":"122"
+                            }
+                          ]
+                        }
+                        , {
+                          "type":"text"
+                          , "text":"4 clock cycles Hardened Floating-point Multiply Operation (%L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                              , "line":"118"
+                            }
+                          ]
+                        }
+                        , {
+                          "type":"text"
+                          , "text":"4 clock cycles Hardened Floating-point Add Operation (%L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                              , "line":"122"
+                            }
+                          ]
+                        }
+                        , {
+                          "type":"text"
+                          , "text":"0.28 clock cycles Or Operation (%L, %L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                              , "line":"121"
+                            }
+                            , {
+                              "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                              , "line":"122"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"brief"
+                      , "text":"Memory dependency"
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Loops in a Single Work-Item Kernel"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#wfa1476380079940"
+                        }
+                      ]
+                    }
+                  ]
+                  , "children":
+                  [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

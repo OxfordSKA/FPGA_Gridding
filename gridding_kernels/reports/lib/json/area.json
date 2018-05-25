@@ -1,0 +1,2383 @@
+{
+  "columns":
+  ["", "ALUTs", "FFs", "RAMs", "DSPs", "Details"]
+  , "debug_enabled":"true"
+  , "type":"module"
+  , "total_percent":
+  [20.5087, 11.0375, 10.1956, 15.2114, 2.50329]
+  , "total":
+  [86931, 160601, 385, 38]
+  , "name":"Kernel System"
+  , "max_resources":
+  [787600, 1575200, 2531, 1518]
+  , "children":
+  [
+    {
+      "name":"Static Partition"
+      , "type":"partition"
+      , "children":
+      [
+        {
+          "name":"Board interface"
+          , "type":"resource"
+          , "data":
+          [66800, 133600, 182, 0]
+          , "details":
+          [
+            {
+              "type":"text"
+              , "text":"Platform interface logic."
+            }
+          ]
+        }
+      ]
+    }
+    , {
+      "name":"Global interconnect"
+      , "type":"resource"
+      , "data":
+      [785, 5357, 18, 0]
+      , "details":
+      [
+        {
+          "type":"text"
+          , "text":"Global interconnect for 7 global loads and 1 global store. Reduce number of global loads and stores to simplify global interconnect."
+        }
+        , {
+          "type":"text"
+          , "text":"See %L for more information"
+          , "links":
+          [
+            {
+              "guide":"Best Practices Guide : Global Memory Interconnect"
+              , "link":"https://www.altera.com/documentation/mwh1391807516407.html#hnj1476724450050"
+            }
+          ]
+        }
+      ]
+    }
+    , {
+      "name":"System description ROM"
+      , "type":"resource"
+      , "data":
+      [0, 67, 2, 0]
+      , "details":
+      [
+        {
+          "type":"text"
+          , "text":"This read-only memory contains information for the host about the system and about each kernel in the system, including kernel names, arguments, and attributes.  The system description ROM ensures that the binary image on the FPGA is compatible with the host program."
+        }
+      ]
+    }
+    , {
+      "name":"oskar_grid_wproj_cl"
+      , "compute_units":1
+      , "type":"function"
+      , "total_percent":
+      [3.575, 2.45632, 1.36979, 7.23034, 2.50329]
+      , "total_kernel_resources":
+      [19346, 21577, 183, 37.5]
+      , "details":
+      [
+        {
+          "type":"text"
+          , "text":"Number of compute units: 1"
+        }
+        , {
+          "type":"text"
+          , "text":"Max global work dimension: 0"
+        }
+      ]
+      , "children":
+      [
+        {
+          "name":"Private Variable: \n - 'j' (gridding_kernels.cl:55)"
+          , "type":"resource"
+          , "data":
+          [7, 36, 0, 0]
+          , "debug":
+          [
+            [
+              {
+                "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                , "line":55
+              }
+            ]
+          ]
+          , "details":
+          [
+            {
+              "type":"text"
+              , "text":"Type: Register"
+            }
+            , {
+              "type":"text"
+              , "text":"1 register of width 32 and depth 1"
+            }
+          ]
+        }
+        , {
+          "name":"Private Variable: \n - 'k' (gridding_kernels.cl:55)"
+          , "type":"resource"
+          , "data":
+          [17, 166, 1, 0]
+          , "debug":
+          [
+            [
+              {
+                "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                , "line":55
+              }
+            ]
+          ]
+          , "details":
+          [
+            {
+              "type":"text"
+              , "text":"Type: Register"
+            }
+            , {
+              "type":"text"
+              , "text":"1 register of width 32 and depth 302 (depth was increased by a factor of 299 due to a loop initiation interval of 299.)"
+            }
+          ]
+        }
+        , {
+          "name":"oskar_grid_wproj_cl.B0"
+          , "type":"basicblock"
+          , "children":
+          [
+            {
+              "name":"Feedback"
+              , "type":"resource"
+              , "data":
+              [5, 2, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Resources for loop-carried dependencies. To reduce this area:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"reduce number and size of loop-carried variables"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"No Source Line"
+                  , "type":"resource"
+                  , "data":
+                  [5, 2, 0, 0]
+                }
+              ]
+            }
+          ]
+        }
+        , {
+          "name":"oskar_grid_wproj_cl.B1"
+          , "type":"basicblock"
+          , "children":
+          [
+            {
+              "name":"State"
+              , "type":"resource"
+              , "data":
+              [1793, 2802, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Resources for live values and control logic. To reduce this area:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"reduce size of local variables"
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"reduce scope of local variables, localizing them as much as possible"
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"reduce number of nested loops"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"No Source Line"
+                  , "type":"resource"
+                  , "data":
+                  [1793, 2449, 0, 0]
+                }
+                , {
+                  "name":"gridding_kernels.cl:101"
+                  , "type":"resource"
+                  , "data":
+                  [0, 33, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":101
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:47"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":47
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:61"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":61
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:65"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":65
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:66"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":66
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:75"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":75
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:76"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":76
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:80"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":80
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:81"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":81
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:85"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":85
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:89"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":89
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+            , {
+              "name":"Cluster logic"
+              , "type":"resource"
+              , "data":
+              [78, 143, 3, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Logic required to efficiently support sets of operations that do not stall. This area cannot be affected directly."
+                }
+              ]
+            }
+            , {
+              "name":"Computation"
+              , "type":"resource"
+              , "children":
+              [
+                {
+                  "name":"No Source Line"
+                  , "type":"resource"
+                  , "data":
+                  [68, 1, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":""
+                        , "line":0
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [35, 1, 0, 0]
+                    }
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:40"
+                  , "type":"resource"
+                  , "data":
+                  [391, 172, 0, 1]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":40
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Hardened Floating-point Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Integer to Floating-point Conversion"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [391, 172, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:47"
+                  , "type":"resource"
+                  , "data":
+                  [32, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":47
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [32, 32, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:58"
+                  , "type":"resource"
+                  , "data":
+                  [345, 339, 13, 1]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":58
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Hardened Floating-point Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [334, 339, 13, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Prefetching LSU"
+                        }
+                      ]
+                    }
+                    , {
+                      "name":"Xor"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [11, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:59"
+                  , "type":"resource"
+                  , "data":
+                  [334, 339, 13, 1]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":59
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Hardened Floating-point Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [334, 339, 13, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Prefetching LSU"
+                        }
+                      ]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:60"
+                  , "type":"resource"
+                  , "data":
+                  [334, 339, 13, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":60
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [334, 339, 13, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Prefetching LSU"
+                        }
+                      ]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:61"
+                  , "type":"resource"
+                  , "data":
+                  [127, 4, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":61
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Floating-point Compare"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [101, 4, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [26, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:62"
+                  , "type":"resource"
+                  , "data":
+                  [1615, 697, 3, 5.5]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":62
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"'ceilf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [299, 96, 0, 0]
+                    }
+                    , {
+                      "name":"'floorf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [295, 95, 0, 0]
+                    }
+                    , {
+                      "name":"'sqrtf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [485, 338, 3, 2.5]
+                    }
+                    , {
+                      "name":"And"
+                      , "type":"resource"
+                      , "count":5
+                      , "data":
+                      [55, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Floating-point to Integer Conversion"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [267, 70, 0, 0]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Subtract"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":4
+                      , "data":
+                      [92, 2, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":4
+                      , "data":
+                      [122, 96, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:65"
+                  , "type":"resource"
+                  , "data":
+                  [1131, 327, 0, 2]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":65
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"'ceilf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [299, 96, 0, 0]
+                    }
+                    , {
+                      "name":"'floorf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [295, 95, 0, 0]
+                    }
+                    , {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"32-bit Integer Subtract"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"And"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Floating-point to Integer Conversion"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [267, 70, 0, 0]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Subtract"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [81, 2, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [90, 64, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:66"
+                  , "type":"resource"
+                  , "data":
+                  [1131, 327, 0, 2]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":66
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"'ceilf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [299, 96, 0, 0]
+                    }
+                    , {
+                      "name":"'floorf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [295, 95, 0, 0]
+                    }
+                    , {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"32-bit Integer Subtract"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"And"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Floating-point to Integer Conversion"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [267, 70, 0, 0]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Subtract"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [81, 2, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [90, 64, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:75"
+                  , "type":"resource"
+                  , "data":
+                  [167, 181.5, 6.5, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":75
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [167, 181.5, 6.5, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Prefetching LSU"
+                        }
+                      ]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:76"
+                  , "type":"resource"
+                  , "data":
+                  [167, 181.5, 6.5, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":76
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [167, 181.5, 6.5, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Prefetching LSU"
+                        }
+                      ]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:80"
+                  , "type":"resource"
+                  , "data":
+                  [1456, 499, 0, 4]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":80
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"'ceilf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [299, 96, 0, 0]
+                    }
+                    , {
+                      "name":"'floorf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [295, 95, 0, 0]
+                    }
+                    , {
+                      "name":"And"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Floating-point to Integer Conversion"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [267, 70, 0, 0]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Subtract"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [0, 0, 0, 2]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [81, 2, 0, 0]
+                    }
+                    , {
+                      "name":"Integer to Floating-point Conversion"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [391, 172, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [90, 64, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:81"
+                  , "type":"resource"
+                  , "data":
+                  [1065, 327, 0, 4]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":81
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"'ceilf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [299, 96, 0, 0]
+                    }
+                    , {
+                      "name":"'floorf' Function Call"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [295, 95, 0, 0]
+                    }
+                    , {
+                      "name":"And"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Floating-point to Integer Conversion"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [267, 70, 0, 0]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Subtract"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [0, 0, 0, 2]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [81, 2, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":3
+                      , "data":
+                      [90, 64, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:85"
+                  , "type":"resource"
+                  , "data":
+                  [3132, 4300, 43, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":85
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [35, 1, 0, 0]
+                    }
+                    , {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [3038, 4299, 43, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Burst-coalesced cached LSU.  Load with a private 512 kilobit cache. Cache is not shared with any other load. It is flushed on kernel start. Use Dynamic Profiler to verify cache effectiveness. Other kernels should not be updating the data in global memory while this kernel is using it. Cache is created when memory access pattern is data-dependent or appears to be repetitive. Simplify access pattern or mark pointer as 'volatile' to disable generation of this cache."
+                        }
+                      ]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [26, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:89"
+                  , "type":"resource"
+                  , "data":
+                  [66, 0, 0, 2]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":89
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [66, 0, 0, 2]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:93"
+                  , "type":"resource"
+                  , "data":
+                  [205, 5, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":93
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [66, 0, 0, 0]
+                    }
+                    , {
+                      "name":"32-bit Integer Subtract"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [66, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":4
+                      , "data":
+                      [72, 4, 0, 0]
+                    }
+                    , {
+                      "name":"Or"
+                      , "type":"resource"
+                      , "count":4
+                      , "data":
+                      [1, 1, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:101"
+                  , "type":"resource"
+                  , "data":
+                  [68, 1, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":101
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Subtract"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [35, 1, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+              ]
+            }
+          ]
+        }
+        , {
+          "name":"oskar_grid_wproj_cl.B2"
+          , "type":"basicblock"
+          , "children":
+          [
+            {
+              "name":"State"
+              , "type":"resource"
+              , "data":
+              [123, 152, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Resources for live values and control logic. To reduce this area:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"reduce size of local variables"
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"reduce scope of local variables, localizing them as much as possible"
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"reduce number of nested loops"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"No Source Line"
+                  , "type":"resource"
+                  , "data":
+                  [123, 152, 0, 0]
+                }
+              ]
+            }
+            , {
+              "name":"Feedback"
+              , "type":"resource"
+              , "data":
+              [20, 45, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Resources for loop-carried dependencies. To reduce this area:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"reduce number and size of loop-carried variables"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"gridding_kernels.cl:101"
+                  , "type":"resource"
+                  , "data":
+                  [15, 43, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":101
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:121"
+                  , "type":"resource"
+                  , "data":
+                  [2.5, 1, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":121
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:122"
+                  , "type":"resource"
+                  , "data":
+                  [2.5, 1, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":122
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+            , {
+              "name":"Cluster logic"
+              , "type":"resource"
+              , "data":
+              [145, 63, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Logic required to efficiently support sets of operations that do not stall. This area cannot be affected directly."
+                }
+              ]
+            }
+            , {
+              "name":"Computation"
+              , "type":"resource"
+              , "children":
+              [
+                {
+                  "name":"No Source Line"
+                  , "type":"resource"
+                  , "data":
+                  [33, 0, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":""
+                        , "line":0
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:101"
+                  , "type":"resource"
+                  , "data":
+                  [94, 1, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":101
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [35, 1, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [26, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:104"
+                  , "type":"resource"
+                  , "data":
+                  [33, 0, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":104
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:105"
+                  , "type":"resource"
+                  , "data":
+                  [66, 0, 0, 2]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":105
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [66, 0, 0, 2]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:106"
+                  , "type":"resource"
+                  , "data":
+                  [33, 0, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":106
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:107"
+                  , "type":"resource"
+                  , "data":
+                  [158, 0, 0, 2]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":107
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"32-bit Integer Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [66, 0, 0, 2]
+                    }
+                    , {
+                      "name":"32-bit Integer Subtract"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [26, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:109"
+                  , "type":"resource"
+                  , "data":
+                  [66, 0, 0, 2]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":109
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [66, 0, 0, 2]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+              ]
+            }
+          ]
+        }
+        , {
+          "name":"oskar_grid_wproj_cl.B3"
+          , "type":"basicblock"
+          , "children":
+          [
+            {
+              "name":"State"
+              , "type":"resource"
+              , "data":
+              [245, 206, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Resources for live values and control logic. To reduce this area:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"reduce size of local variables"
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"reduce scope of local variables, localizing them as much as possible"
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"reduce number of nested loops"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"No Source Line"
+                  , "type":"resource"
+                  , "data":
+                  [245, 206, 0, 0]
+                }
+              ]
+            }
+            , {
+              "name":"Feedback"
+              , "type":"resource"
+              , "data":
+              [219, 896, 8, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Resources for loop-carried dependencies. To reduce this area:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"reduce number and size of loop-carried variables"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"gridding_kernels.cl:101"
+                  , "type":"resource"
+                  , "data":
+                  [14, 94, 2, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":101
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:106"
+                  , "type":"resource"
+                  , "data":
+                  [37, 199, 1, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":106
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:109"
+                  , "type":"resource"
+                  , "data":
+                  [37, 199, 1, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":109
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:110"
+                  , "type":"resource"
+                  , "data":
+                  [65, 266, 2, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":110
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:121"
+                  , "type":"resource"
+                  , "data":
+                  [33, 69, 1, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":121
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:122"
+                  , "type":"resource"
+                  , "data":
+                  [33, 69, 1, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":122
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+            , {
+              "name":"Cluster logic"
+              , "type":"resource"
+              , "data":
+              [86, 53, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Logic required to efficiently support sets of operations that do not stall. This area cannot be affected directly."
+                }
+              ]
+            }
+            , {
+              "name":"Computation"
+              , "type":"resource"
+              , "children":
+              [
+                {
+                  "name":"gridding_kernels.cl:110"
+                  , "type":"resource"
+                  , "data":
+                  [95, 2, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":110
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [35, 1, 0, 0]
+                    }
+                    , {
+                      "name":"Iteration Initiation"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [1, 1, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [26, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:112"
+                  , "type":"resource"
+                  , "data":
+                  [191.5, 0.5, 0, 2]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":112
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [66, 0, 0, 0]
+                    }
+                    , {
+                      "name":"32-bit Integer Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [66, 0, 0, 2]
+                    }
+                    , {
+                      "name":"32-bit Integer Subtract"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Iteration Initiation"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0.5, 0.5, 0, 0]
+                    }
+                    , {
+                      "name":"Select"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [26, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:117"
+                  , "type":"resource"
+                  , "data":
+                  [1515, 2165.5, 21.5, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":117
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [1515, 2165.5, 21.5, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Burst-coalesced cached LSU.  Load with a private 512 kilobit cache. Cache is not shared with any other load. It is flushed on kernel start. Use Dynamic Profiler to verify cache effectiveness. Other kernels should not be updating the data in global memory while this kernel is using it. Cache is created when memory access pattern is data-dependent or appears to be repetitive. Simplify access pattern or mark pointer as 'volatile' to disable generation of this cache."
+                        }
+                      ]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:118"
+                  , "type":"resource"
+                  , "data":
+                  [1515, 2165.5, 21.5, 1]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":118
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Hardened Floating-point Multiply"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [1515, 2165.5, 21.5, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Burst-coalesced cached LSU.  Load with a private 512 kilobit cache. Cache is not shared with any other load. It is flushed on kernel start. Use Dynamic Profiler to verify cache effectiveness. Other kernels should not be updating the data in global memory while this kernel is using it. Cache is created when memory access pattern is data-dependent or appears to be repetitive. Simplify access pattern or mark pointer as 'volatile' to disable generation of this cache."
+                        }
+                      ]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:120"
+                  , "type":"resource"
+                  , "data":
+                  [33, 0, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":120
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:121"
+                  , "type":"resource"
+                  , "data":
+                  [434.5, 2273, 15, 3]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":121
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Hardened Floating-point Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Product Difference of Size 2 (a2*b2 - a1*b1)"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 128, 0, 2]
+                    }
+                    , {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [243, 1025, 6.5, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Burst-coalesced LSU"
+                        }
+                      ]
+                    }
+                    , {
+                      "name":"Store"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [191.5, 1120, 8.5, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Store uses a Burst-coalesced write-ack LSU"
+                        }
+                      ]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:122"
+                  , "type":"resource"
+                  , "data":
+                  [434.5, 2273, 15, 3]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":122
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Hardened Floating-point Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 0, 0, 1]
+                    }
+                    , {
+                      "name":"Hardened Floating-point Dot Product of Size 2"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0, 128, 0, 2]
+                    }
+                    , {
+                      "name":"Load"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [243, 1025, 6.5, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load uses a Burst-coalesced LSU"
+                        }
+                      ]
+                    }
+                    , {
+                      "name":"Store"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [191.5, 1120, 8.5, 0]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Store uses a Burst-coalesced write-ack LSU"
+                        }
+                      ]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+                , {
+                  "name":"gridding_kernels.cl:125"
+                  , "type":"resource"
+                  , "data":
+                  [0.5, 0.5, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":125
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"Iteration Initiation"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [0.5, 0.5, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+              ]
+            }
+          ]
+        }
+        , {
+          "name":"oskar_grid_wproj_cl.B4"
+          , "type":"basicblock"
+          , "children":
+          [
+            {
+              "name":"Feedback"
+              , "type":"resource"
+              , "data":
+              [25, 19, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Resources for loop-carried dependencies. To reduce this area:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"reduce number and size of loop-carried variables"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"gridding_kernels.cl:121"
+                  , "type":"resource"
+                  , "data":
+                  [12.5, 9.5, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":121
+                      }
+                    ]
+                  ]
+                }
+                , {
+                  "name":"gridding_kernels.cl:122"
+                  , "type":"resource"
+                  , "data":
+                  [12.5, 9.5, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":122
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+        , {
+          "name":"oskar_grid_wproj_cl.B5"
+          , "type":"basicblock"
+          , "children":
+          [
+            {
+              "name":"State"
+              , "type":"resource"
+              , "data":
+              [0, 32, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Resources for live values and control logic. To reduce this area:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"reduce size of local variables"
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"reduce scope of local variables, localizing them as much as possible"
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"reduce number of nested loops"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"gridding_kernels.cl:47"
+                  , "type":"resource"
+                  , "data":
+                  [0, 32, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":47
+                      }
+                    ]
+                  ]
+                }
+              ]
+            }
+            , {
+              "name":"Computation"
+              , "type":"resource"
+              , "children":
+              [
+                {
+                  "name":"gridding_kernels.cl:47"
+                  , "type":"resource"
+                  , "data":
+                  [44, 1, 0, 0]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_ref_v0/gridding_kernels.cl"
+                        , "line":47
+                      }
+                    ]
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"32-bit Integer Add"
+                      , "type":"resource"
+                      , "count":1
+                      , "data":
+                      [33, 0, 0, 0]
+                    }
+                    , {
+                      "name":"Integer Compare"
+                      , "type":"resource"
+                      , "count":2
+                      , "data":
+                      [11, 1, 0, 0]
+                    }
+                  ]
+                  , "replace_name":"true"
+                }
+              ]
+            }
+          ]
+        }
+        , {
+          "name":"oskar_grid_wproj_cl.B6"
+          , "type":"basicblock"
+          , "children":
+          [
+            {
+              "name":"Feedback"
+              , "type":"resource"
+              , "data":
+              [3, 8, 0, 0]
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Resources for loop-carried dependencies. To reduce this area:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"reduce number and size of loop-carried variables"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"No Source Line"
+                  , "type":"resource"
+                  , "data":
+                  [3, 8, 0, 0]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
