@@ -57,6 +57,9 @@ __kernel void oskar_process_all_tiles(
     const double scale = grid_size * cell_size_rad;
 
     const int nTiles = numTiles_u * numTiles_v;
+    //const int nTiles = 623;
+    //printf("nTiles = %d\n", nTiles);
+    //const int nTiles = 1;
 
     double norm = 0.0;
     int num_skipped = 0;
@@ -73,10 +76,12 @@ __kernel void oskar_process_all_tiles(
     conv_eng_config.tileWidth = tileWidth;
     conv_eng_config.trimmed_grid_size = trimmed_grid_size;
     write_channel_intel(chConvEngConfig, conv_eng_config);
+    //printf("sent conv eng config\n");
 
     // Loop over the Tiles.
     for (int tile=0; tile<nTiles; tile++)
     {
+        //printf("beginning of tile\n");
 		// Get some information about this Tile.
 		int pu = workQueue_pu[tile];
 		int pv = workQueue_pv[tile];
@@ -84,7 +89,6 @@ __kernel void oskar_process_all_tiles(
         int tileTopLeft_u = pu*tileWidth;
         int tileTopLeft_v = pv*tileHeight;
         int tileOffset = tileTopLeft_v*trimmed_grid_size + tileTopLeft_u;
-        //printf("pu: %d, pv: %d, tileOffset: %d\n", pu, pv, tileOffset);
 		
         const int off = OFFSETS_IN_TILES(pu, pv);
 		const int num_tile_vis = NUM_POINTS_IN_TILES(pu,pv);
@@ -95,6 +99,7 @@ __kernel void oskar_process_all_tiles(
         tile_config.is_final = 0;
         if (tile==nTiles-1) tile_config.is_final = 1;
         write_channel_intel(chTileConfig, tile_config);
+        //printf("sent tile config %d num vis %d is final %d\n", tile, tile_config.num_tile_vis, tile_config.is_final);
 
 		// Loop over visibilities in the Tile.
 		for (int i = 0; i < num_tile_vis; i++)
@@ -161,11 +166,12 @@ __kernel void oskar_process_all_tiles(
             write_channel_intel(chVis, vis);
             
 		} // END loop over vis in tile
+        //printf("finished tile %d\n", tile);
 
     } // END loop over tiles
 
     uchar finished = read_channel_intel(chConvEngFinished);
-    printf("finished: %u\n", finished);
+    //printf("finished: %u\n", finished);
 
 
 #undef NUM_POINTS_IN_TILES
@@ -183,7 +189,8 @@ __kernel void convEng()
 #if 1
     double norm = 0.0;
     int num_skipped = 0;
-
+    
+    bool final_iter = 0;
     #define MAX( A, B ) ( (A) > (B) ? (A) : (B) )
     #define MIN( A, B ) ( (A) < (B) ? (A) : (B) )
 
@@ -196,6 +203,7 @@ __kernel void convEng()
     conv_eng_config = read_channel_intel(chConvEngConfig);
     int tileHeight = conv_eng_config.tileHeight;
     int tileWidth = conv_eng_config.tileWidth;
+    if (conv_eng_config.tileHeight > 0) final_iter = 1;
     int trimmed_grid_size = conv_eng_config.trimmed_grid_size;
     __global float2* restrict compact_wkernel = (__global float2* restrict)conv_eng_config.compact_wkernel;
 
@@ -204,14 +212,17 @@ __kernel void convEng()
     while(1){
         // Iterate over tiles
         struct ChDataTileConfig tile_config;
-        tile_config = read_channel_intel(chTileConfig); 
-
-        //printf("count: %d, numVis: %d\n", count++, tile_config.num_tile_vis);
+        //printf("in autorun final_iter: %d\n", final_iter);
+        if (final_iter ==1){
+            tile_config = read_channel_intel(chTileConfig); 
+        }
+        //printf("received tile config. numVis: %d\n", tile_config.num_tile_vis);
         // Copy global grid to grid_local
         __global float2 *restrict grid_pointer;
         for (int y=0; y<tileHeight; y++){
             for (int x=0; x<tileWidth; x++){
                 //! fix -- is this cast still required?
+                // copy pointer to local first
                 grid_pointer = (__global float2 *restrict)&tile_config.grid_pointer[y*trimmed_grid_size + x];
                 grid_local[y][x] = *grid_pointer;
             }
@@ -222,7 +233,8 @@ __kernel void convEng()
         {
             struct ChDataVis vis;
             vis = read_channel_intel(chVis);
-            
+            //if (vis.wsupport > 0) final_iter = tile_config.is_final;
+            //printf("read vis %d: %f\n", i, vis.val.x);
             float2 val     = vis.val;
             const int grid_local_u = vis.grid_local_u;
             const int grid_local_v = vis.grid_local_v;
@@ -281,6 +293,8 @@ __kernel void convEng()
             
         } // END loop over vis in tile
 
+        //printf("finished tile in autorun kernel\n");
+
         // put the grid back
         for (int y=0; y<tileHeight; y++){
             for (int x=0; x<tileWidth; x++){
@@ -292,7 +306,6 @@ __kernel void convEng()
 
         if (tile_config.is_final==1) {
             write_channel_intel(chConvEngFinished, tile_config.is_final);
-            break;
         }
     } // END loop over tiles
 
