@@ -46,8 +46,8 @@ __kernel void oskar_grid_wproj_cl(
     
     /* Loop over visibilities. */
     int num_skipped = 0;
-    //for (i = 0; i < num_points; ++i)
-    for (i = 0; i < 100000; ++i)  //the bound is actually num_points and it is variable
+    for (i = 0; i < num_points; ++i)
+    //for (i = 0; i < 100000; ++i)  //the bound is actually num_points and it is variable
     {
     	#if EMULATOR > 0
     	if ((i%1000) == 0) printf("i: %d\n", i);

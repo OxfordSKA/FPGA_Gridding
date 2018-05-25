@@ -151,8 +151,8 @@ void oskar_grid_wproj_f(
 
     /* Loop over visibilities. */
     *num_skipped = 0;
-    //for (i = 0; i < num_points; ++i)
-    for (i = 0; i < 100000; ++i)
+    for (i = 0; i < num_points; ++i)
+    //for (i = 0; i < 100000; ++i)
     {
     	//if ((i%1000)==0) printf("i: %d\n", i);
         
