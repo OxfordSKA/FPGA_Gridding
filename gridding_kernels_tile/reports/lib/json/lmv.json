@@ -15,8 +15,8 @@
           [
             [
               {
-                "filename":"/home/ania/git_tile_v2/gridding_kernels_tile.cl"
-                , "line":227
+                "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                , "line":231
               }
             ]
           ]
@@ -49,14 +49,14 @@
         }
         , {
           "type":"inst"
-          , "id":57
+          , "id":56
           , "name":"Load"
           , "debug":
           [
             [
               {
-                "filename":"/home/ania/git_tile_v2/gridding_kernels_tile.cl"
-                , "line":287
+                "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                , "line":263
               }
             ]
           ]
@@ -68,8 +68,8 @@
               , "Type":"Pipelined"
               , "Stall-free":"Yes"
               , "Loads from":"grid_local"
-              , "Start Cycle":"178"
-              , "Latency":"1"
+              , "Start Cycle":"2"
+              , "Latency":"3"
               , "Reference":
               [
                 {
@@ -95,8 +95,8 @@
           [
             [
               {
-                "filename":"/home/ania/git_tile_v2/gridding_kernels_tile.cl"
-                , "line":287
+                "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                , "line":263
               }
             ]
           ]
@@ -108,7 +108,7 @@
               , "Type":"Pipelined"
               , "Stall-free":"Yes"
               , "Stores to":"grid_local"
-              , "Start Cycle":"182"
+              , "Start Cycle":"184"
               , "Latency":"1"
               , "Reference":
               [
@@ -135,8 +135,8 @@
           [
             [
               {
-                "filename":"/home/ania/git_tile_v2/gridding_kernels_tile.cl"
-                , "line":303
+                "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                , "line":279
               }
             ]
           ]
@@ -149,7 +149,7 @@
               , "Stall-free":"Yes"
               , "Loads from":"grid_local"
               , "Start Cycle":"2"
-              , "Latency":"1"
+              , "Latency":"3"
               , "Reference":
               [
                 {
@@ -181,8 +181,8 @@
               [
                 [
                   {
-                    "filename":"/home/ania/git_tile_v2/gridding_kernels_tile.cl"
-                    , "line":200
+                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                    , "line":204
                   }
                 ]
               ]
@@ -196,8 +196,8 @@
                   [
                     [
                       {
-                        "filename":"/home/ania/git_tile_v2/gridding_kernels_tile.cl"
-                        , "line":200
+                        "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                        , "line":204
                       }
                     ]
                   ]
@@ -286,7 +286,7 @@
   [
     {
       "from":80
-      , "to":57
+      , "to":56
     }
     , {
       "from":80

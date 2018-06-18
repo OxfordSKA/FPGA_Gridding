@@ -14,10 +14,10 @@ struct ChDataTileConfig {
 
 struct ChDataVis {
     int compact_start_index, grid_local_u, grid_local_v;
-    int oversample_off_u, oversample_off_v;
+    int u_fac, v_fac;
     int jstart, jend, kstart, kend;
     int wsupport;
-    int conv_mul;
+    float conv_mul;
     float2 val;
 };
 
@@ -126,8 +126,6 @@ __kernel void oskar_process_all_tiles(
 			const int off_u = (int)round( (round(pos_u)-pos_u) * oversample);   // \in [-oversample/2, oversample/2]
 			const int off_v = (int)round( (round(pos_v)-pos_v) * oversample);    // \in [-oversample/2, oversample/2]
 
-			// Convolve this point.
-			double sum = 0.0;
 
 			const int compact_start = compact_wkernel_start[grid_w];
 
@@ -149,18 +147,24 @@ __kernel void oskar_process_all_tiles(
 			const int jstart = MAX(tile_v[0]-grid_v, -wsupport);
 			const int jend   = MIN(tile_v[1]-grid_v,  wsupport);
 
+            int u_fac = 0, v_fac = 0;
+            if (off_u >= 0) u_fac = 1;
+            if (off_u < 0) u_fac = -1;
+            if (off_v >= 0) v_fac = 1;
+            if (off_v < 0) v_fac = -1;
+
             struct ChDataVis vis;
             vis.compact_start_index = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + wsupport*(2*wsupport + 1) + wsupport; 
             vis.grid_local_u = grid_local_u;
             vis.grid_local_v = grid_local_v;
-            vis.oversample_off_u = off_u;
-            vis.oversample_off_v = off_v;
+            vis.u_fac = u_fac;
+            vis.v_fac = v_fac;
             vis.jstart = jstart;
             vis.jend = jend;
             vis.kstart = kstart;
             vis.kend = kend;
             vis.wsupport = wsupport;
-            vis.conv_mul = conv_mul; 
+            vis.conv_mul = (float) conv_mul; 
             vis.val = val;
 
             write_channel_intel(chVis, vis);
@@ -228,64 +232,36 @@ __kernel void convEng()
             }
         }
 
+        // Convolve this point.
+        double sum = 0.0;
+
         // Loop over visibilities in the Tile.
         for (int i = 0; i < tile_config.num_tile_vis; i++)
         {
             struct ChDataVis vis;
             vis = read_channel_intel(chVis);
-            //if (vis.wsupport > 0) final_iter = tile_config.is_final;
-            //printf("read vis %d: %f\n", i, vis.val.x);
-            float2 val     = vis.val;
-            const int grid_local_u = vis.grid_local_u;
-            const int grid_local_v = vis.grid_local_v;
 
-            // Convolve this point.
-            double sum = 0.0;
-
-            const int compact_start_index = vis.compact_start_index;
-
-            float conv_mul = (float) vis.conv_mul;
-
-            const int kstart = vis.kstart;
-            const int kend   = vis.kend;
-
-            const int jstart = vis.jstart;
-            const int jend   = vis.jend;
-
-            const int wsupport = vis.wsupport;
-            int off_u = vis.oversample_off_u;
-            int off_v = vis.oversample_off_v;
-
-            int u_fac = 0, v_fac = 0;
-            if (off_u >= 0) u_fac = 1;
-            if (off_u < 0) u_fac = -1;
-            if (off_v >= 0) v_fac = 1;
-            if (off_v < 0) v_fac = -1;
-        
-            for (int j = jstart; j <= jend; ++j)
+            for (int j = vis.jstart; j <= vis.jend; ++j)
             {
                   // Compiler assumes there's a dependency but there isn't
                   // as threads don't access overlapping grid regions.
                   // So we have to tell the compiler explicitly to vectorise.
-                #pragma omp simd
-                for (int k = kstart; k <= kend; ++k)
+                #pragma ivdep
+                for (int k = vis.kstart; k <= vis.kend; ++k)
                 {
-                    //int p = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + (j*v_fac + wsupport)*(2*wsupport + 1) + k*u_fac + wsupport;
-                    //int p = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + wsupport*(2*wsupport + 1) + wsupport + k*u_fac + j*v_fac*(2*wsupport+1);
-
-                    int p = compact_start_index + j*v_fac*(2*wsupport+1) + k*u_fac;
+                    int p = vis.compact_start_index + j*vis.v_fac*(2*vis.wsupport+1) + k*vis.u_fac;
 
                     float2 c = compact_wkernel[p];
-                    c.y *= conv_mul;
+                    c.y *= vis.conv_mul;
 
                     // Real part only.
                     sum += c.x;
 
                     //p = ((grid_v + j) * trimmed_grid_size) + grid_u + k;
-                    //grid[2*p]     += (val.x * c.x - val.y * c.y);
-                    //grid[2*p + 1] += (val.y * c.x + val.x * c.y);
-                    grid_local[grid_local_v + j][grid_local_u + k] +=
-                        (float2) ((val.x * c.x - val.y * c.y), (val.y * c.x + val.x * c.y));
+                    //grid[2*p]     += (vis.val.x * c.x - vis.val.y * c.y);
+                    //grid[2*p + 1] += (vis.val.y * c.x + vis.val.x * c.y);
+                    grid_local[vis.grid_local_v + j][vis.grid_local_u + k] +=
+                        (float2) ((vis.val.x * c.x - vis.val.y * c.y), (vis.val.y * c.x + vis.val.x * c.y));
                 }
             }
             //norm += sum * w;
