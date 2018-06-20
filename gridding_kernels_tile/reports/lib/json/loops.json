@@ -11,7 +11,7 @@
       [
         [
           {
-            "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
             , "line":54
           }
         ]
@@ -48,13 +48,13 @@
           [
             [
               {
-                "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
                 , "line":82
               }
             ]
             , [
               {
-                "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
                 , "line":82
               }
             ]
@@ -86,80 +86,80 @@
               [
                 [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":105
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":107
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":105
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":107
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":144
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":146
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":145
-                  }
-                ]
-                , [
-                  {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
                     , "line":147
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":148
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":149
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":151
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":150
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":152
-                  }
-                ]
-                , [
-                  {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
                     , "line":153
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
                     , "line":154
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":157
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":155
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":157
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":156
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":172
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":159
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":159
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":174
                   }
                 ]
               ]
@@ -186,29 +186,7 @@
                       , "links":
                       [
                         {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                          , "line":"108"
-                        }
-                      ]
-                    }
-                    , {
-                      "type":"text"
-                      , "text":"Load Operation (%L)"
-                      , "links":
-                      [
-                        {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                          , "line":"109"
-                        }
-                      ]
-                    }
-                    , {
-                      "type":"text"
-                      , "text":"Load Operation (%L)"
-                      , "links":
-                      [
-                        {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
                           , "line":"110"
                         }
                       ]
@@ -219,8 +197,8 @@
                       , "links":
                       [
                         {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                          , "line":"113"
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"111"
                         }
                       ]
                     }
@@ -230,8 +208,8 @@
                       , "links":
                       [
                         {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                          , "line":"124"
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"112"
                         }
                       ]
                     }
@@ -241,8 +219,30 @@
                       , "links":
                       [
                         {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                          , "line":"130"
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"115"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"Load Operation (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"126"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"Load Operation (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"132"
                         }
                       ]
                     }
@@ -252,8 +252,8 @@
                       , "links":
                       [
                         {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                          , "line":"170"
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"172"
                         }
                       ]
                     }
@@ -276,8 +276,8 @@
       [
         [
           {
-            "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-            , "line":191
+            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+            , "line":193
           }
         ]
       ]
@@ -313,8 +313,8 @@
           [
             [
               {
-                "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                , "line":286
+                "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                , "line":288
               }
             ]
           ]
@@ -340,8 +340,8 @@
                       , "links":
                       [
                         {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                          , "line":"244"
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"246"
                         }
                       ]
                     }
@@ -351,12 +351,12 @@
                       , "links":
                       [
                         {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                          , "line":"250"
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"252"
                         }
                         , {
-                          "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                          , "line":"265"
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"267"
                         }
                       ]
                     }
@@ -397,14 +397,14 @@
               [
                 [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":226
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":228
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":226
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":228
                   }
                 ]
               ]
@@ -435,20 +435,20 @@
                   [
                     [
                       {
-                        "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                        , "line":227
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":229
                       }
                     ]
                     , [
                       {
-                        "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                        , "line":227
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":229
                       }
                     ]
                     , [
                       {
-                        "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                        , "line":232
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":234
                       }
                     ]
                   ]
@@ -475,8 +475,8 @@
                           , "links":
                           [
                             {
-                              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                              , "line":"231"
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"233"
                             }
                           ]
                         }
@@ -497,14 +497,14 @@
               [
                 [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":239
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":241
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":239
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":241
                   }
                 ]
               ]
@@ -530,8 +530,8 @@
                           , "links":
                           [
                             {
-                              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                              , "line":"244"
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"246"
                             }
                           ]
                         }
@@ -541,12 +541,12 @@
                           , "links":
                           [
                             {
-                              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                              , "line":"250"
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"252"
                             }
                             , {
-                              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                              , "line":"265"
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"267"
                             }
                           ]
                         }
@@ -587,14 +587,14 @@
                   [
                     [
                       {
-                        "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                        , "line":244
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":246
                       }
                     ]
                     , [
                       {
-                        "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                        , "line":244
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":246
                       }
                     ]
                   ]
@@ -611,8 +611,8 @@
                           , "links":
                           [
                             {
-                              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                              , "line":"263"
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"265"
                             }
                           ]
                         }
@@ -622,8 +622,8 @@
                           , "links":
                           [
                             {
-                              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                              , "line":"263"
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"265"
                             }
                           ]
                         }
@@ -655,20 +655,20 @@
                       [
                         [
                           {
-                            "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                            , "line":250
+                            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                            , "line":252
                           }
                         ]
                         , [
                           {
-                            "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                            , "line":250
+                            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                            , "line":252
                           }
                         ]
                         , [
                           {
-                            "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                            , "line":265
+                            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                            , "line":267
                           }
                         ]
                       ]
@@ -695,8 +695,8 @@
                               , "links":
                               [
                                 {
-                                  "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                                  , "line":"254"
+                                  "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                                  , "line":"256"
                                 }
                               ]
                             }
@@ -719,14 +719,14 @@
               [
                 [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":275
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":277
                   }
                 ]
                 , [
                   {
-                    "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                    , "line":275
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":277
                   }
                 ]
               ]
@@ -757,20 +757,20 @@
                   [
                     [
                       {
-                        "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                        , "line":276
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":278
                       }
                     ]
                     , [
                       {
-                        "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                        , "line":276
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":278
                       }
                     ]
                     , [
                       {
-                        "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                        , "line":280
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":282
                       }
                     ]
                   ]
@@ -797,8 +797,8 @@
                           , "links":
                           [
                             {
-                              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-                              , "line":"279"
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"281"
                             }
                           ]
                         }

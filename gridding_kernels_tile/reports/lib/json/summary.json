@@ -42,8 +42,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-              , "line":191
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              , "line":193
             }
           ]
         ]
@@ -80,7 +80,7 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
               , "line":54
             }
           ]
@@ -103,8 +103,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-              , "line":191
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              , "line":193
             }
           ]
         ]
@@ -112,12 +112,12 @@
       , {
         "name":"oskar_process_all_tiles"
         , "data":
-        [38710, 42578, 394, 40.5]
+        [38724, 42451, 394, 40.5]
         , "debug":
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
               , "line":54
             }
           ]
@@ -128,14 +128,14 @@
         , "classes":
         ["summary-highlight", "nohover"]
         , "data":
-        [44531, 53317, 450, 57]
+        [44545, 53190, 450, 57]
       }
       , {
         "name":"Channel Resources"
         , "classes":
         ["summary-highlight", "nohover"]
         , "data":
-        [512, 2302, 0, 0]
+        [524, 2695, 0, 0]
       }
       , {
         "name":"Global Interconnect"
@@ -156,9 +156,9 @@
         , "classes":
         ["summary-highlight", "nohover"]
         , "data":
-        [112712, 197667, 652, 57]
+        [112738, 197933, 652, 57]
         , "data_percent":
-        [14.3108, 12.5487, 25.7606, 3.82082]
+        [14.3141, 12.5656, 25.7606, 3.82082]
       }
       , {
         "name":"Available"
@@ -187,8 +187,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-              , "line":93
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              , "line":89
             }
           ]
         ]
@@ -206,8 +206,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-              , "line":94
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              , "line":90
             }
           ]
         ]
@@ -225,45 +225,7 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-              , "line":108
-            }
-          ]
-        ]
-      }
-      , {
-        "name":"Load uses a Burst-coalesced cached LSU"
-        , "details":
-        [
-          {
-            "type":"text"
-            , "text":"Load with a private 512 kilobit cache. Cache is not shared with any other load. It is flushed on kernel start. Use Dynamic Profiler to verify cache effectiveness. Other kernels should not be updating the data in global memory while this kernel is using it. Cache is created when memory access pattern is data-dependent or appears to be repetitive. Simplify access pattern or mark pointer as 'volatile' to disable generation of this cache."
-          }
-        ]
-        , "debug":
-        [
-          [
-            {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-              , "line":109
-            }
-          ]
-        ]
-      }
-      , {
-        "name":"Load uses a Burst-coalesced cached LSU"
-        , "details":
-        [
-          {
-            "type":"text"
-            , "text":"Load with a private 512 kilobit cache. Cache is not shared with any other load. It is flushed on kernel start. Use Dynamic Profiler to verify cache effectiveness. Other kernels should not be updating the data in global memory while this kernel is using it. Cache is created when memory access pattern is data-dependent or appears to be repetitive. Simplify access pattern or mark pointer as 'volatile' to disable generation of this cache."
-          }
-        ]
-        , "debug":
-        [
-          [
-            {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
               , "line":110
             }
           ]
@@ -282,8 +244,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-              , "line":113
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              , "line":111
             }
           ]
         ]
@@ -301,8 +263,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-              , "line":124
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              , "line":112
             }
           ]
         ]
@@ -320,8 +282,46 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v5/gridding_kernels_tile.cl"
-              , "line":130
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              , "line":115
+            }
+          ]
+        ]
+      }
+      , {
+        "name":"Load uses a Burst-coalesced cached LSU"
+        , "details":
+        [
+          {
+            "type":"text"
+            , "text":"Load with a private 512 kilobit cache. Cache is not shared with any other load. It is flushed on kernel start. Use Dynamic Profiler to verify cache effectiveness. Other kernels should not be updating the data in global memory while this kernel is using it. Cache is created when memory access pattern is data-dependent or appears to be repetitive. Simplify access pattern or mark pointer as 'volatile' to disable generation of this cache."
+          }
+        ]
+        , "debug":
+        [
+          [
+            {
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              , "line":126
+            }
+          ]
+        ]
+      }
+      , {
+        "name":"Load uses a Burst-coalesced cached LSU"
+        , "details":
+        [
+          {
+            "type":"text"
+            , "text":"Load with a private 512 kilobit cache. Cache is not shared with any other load. It is flushed on kernel start. Use Dynamic Profiler to verify cache effectiveness. Other kernels should not be updating the data in global memory while this kernel is using it. Cache is created when memory access pattern is data-dependent or appears to be repetitive. Simplify access pattern or mark pointer as 'volatile' to disable generation of this cache."
+          }
+        ]
+        , "debug":
+        [
+          [
+            {
+              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              , "line":132
             }
           ]
         ]

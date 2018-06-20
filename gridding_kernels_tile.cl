@@ -22,8 +22,8 @@ struct ChDataVis {
 };
 
 channel struct ChDataConvEngConfig chConvEngConfig __attribute__((depth(1)));
-channel struct ChDataTileConfig chTileConfig __attribute__((depth(1)));
-channel struct ChDataVis chVis __attribute__((depth(8)));
+channel struct ChDataTileConfig chTileConfig __attribute__((depth(4)));
+channel struct ChDataVis chVis __attribute__((depth(16)));
 channel uchar chConvEngFinished __attribute__((depth(1)));
 
 __attribute__((max_global_work_dim(0)))
@@ -86,12 +86,14 @@ __kernel void oskar_process_all_tiles(
 		int pu = workQueue_pu[tile];
 		int pv = workQueue_pv[tile];
 
+        const int off = OFFSETS_IN_TILES(pu, pv);
+		const int num_tile_vis = NUM_POINTS_IN_TILES(pu,pv);
+
+        if (num_tile_vis==0 && (tile<nTiles-1)) continue;
+
         int tileTopLeft_u = pu*tileWidth;
         int tileTopLeft_v = pv*tileHeight;
         int tileOffset = tileTopLeft_v*trimmed_grid_size + tileTopLeft_u;
-		
-        const int off = OFFSETS_IN_TILES(pu, pv);
-		const int num_tile_vis = NUM_POINTS_IN_TILES(pu,pv);
 
         struct ChDataTileConfig tile_config;
         tile_config.grid_pointer = (__global float2 *restrict)&grid[tileOffset*2];
@@ -241,6 +243,7 @@ __kernel void convEng()
             struct ChDataVis vis;
             vis = read_channel_intel(chVis);
 
+            #pragma ivdep
             for (int j = vis.jstart; j <= vis.jend; ++j)
             {
                   // Compiler assumes there's a dependency but there isn't
