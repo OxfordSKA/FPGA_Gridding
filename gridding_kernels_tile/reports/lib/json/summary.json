@@ -42,8 +42,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":193
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":202
             }
           ]
         ]
@@ -80,8 +80,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":54
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":56
             }
           ]
         ]
@@ -98,13 +98,13 @@
       {
         "name":"convEng"
         , "data":
-        [5821, 10739, 56, 17]
+        [5966, 11153, 2104, 17]
         , "debug":
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":193
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":202
             }
           ]
         ]
@@ -112,13 +112,13 @@
       , {
         "name":"oskar_process_all_tiles"
         , "data":
-        [38724, 42451, 394, 40.5]
+        [39218, 42787, 400, 48.5]
         , "debug":
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":54
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":56
             }
           ]
         ]
@@ -128,14 +128,14 @@
         , "classes":
         ["summary-highlight", "nohover"]
         , "data":
-        [44545, 53190, 450, 57]
+        [45184, 53940, 2504, 65]
       }
       , {
         "name":"Channel Resources"
         , "classes":
         ["summary-highlight", "nohover"]
         , "data":
-        [524, 2695, 0, 0]
+        [584, 2903, 0, 0]
       }
       , {
         "name":"Global Interconnect"
@@ -156,9 +156,9 @@
         , "classes":
         ["summary-highlight", "nohover"]
         , "data":
-        [112738, 197933, 652, 57]
+        [113437, 198891, 2706, 65]
         , "data_percent":
-        [14.3141, 12.5656, 25.7606, 3.82082]
+        [14.4029, 12.6264, 106.914, 4.34783]
       }
       , {
         "name":"Available"
@@ -187,8 +187,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":89
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":91
             }
           ]
         ]
@@ -206,8 +206,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":90
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":92
             }
           ]
         ]
@@ -225,8 +225,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":110
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":113
             }
           ]
         ]
@@ -244,8 +244,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":111
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":114
             }
           ]
         ]
@@ -263,26 +263,7 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":112
-            }
-          ]
-        ]
-      }
-      , {
-        "name":"Load uses a Burst-coalesced cached LSU"
-        , "details":
-        [
-          {
-            "type":"text"
-            , "text":"Load with a private 512 kilobit cache. Cache is not shared with any other load. It is flushed on kernel start. Use Dynamic Profiler to verify cache effectiveness. Other kernels should not be updating the data in global memory while this kernel is using it. Cache is created when memory access pattern is data-dependent or appears to be repetitive. Simplify access pattern or mark pointer as 'volatile' to disable generation of this cache."
-          }
-        ]
-        , "debug":
-        [
-          [
-            {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
               , "line":115
             }
           ]
@@ -301,8 +282,8 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":126
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":118
             }
           ]
         ]
@@ -320,8 +301,27 @@
         [
           [
             {
-              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
-              , "line":132
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":129
+            }
+          ]
+        ]
+      }
+      , {
+        "name":"Load uses a Burst-coalesced cached LSU"
+        , "details":
+        [
+          {
+            "type":"text"
+            , "text":"Load with a private 512 kilobit cache. Cache is not shared with any other load. It is flushed on kernel start. Use Dynamic Profiler to verify cache effectiveness. Other kernels should not be updating the data in global memory while this kernel is using it. Cache is created when memory access pattern is data-dependent or appears to be repetitive. Simplify access pattern or mark pointer as 'volatile' to disable generation of this cache."
+          }
+        ]
+        , "debug":
+        [
+          [
+            {
+              "filename":"/home/ania/git_tile_v9/gridding_kernels_tile.cl"
+              , "line":135
             }
           ]
         ]

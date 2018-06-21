@@ -13,12 +13,14 @@ struct ChDataTileConfig {
 };
 
 struct ChDataVis {
-    int compact_start_index, grid_local_u, grid_local_v;
+    int compact_start_index, index_in_compact_kernel, grid_local_u, grid_local_v;
     int u_fac, v_fac;
     int jstart, jend, kstart, kend;
     int wsupport;
     float conv_mul;
     float2 val;
+    int load_new_conv_kernel;
+    int conv_kernel_size;
 };
 
 channel struct ChDataConvEngConfig chConvEngConfig __attribute__((depth(1)));
@@ -103,6 +105,7 @@ __kernel void oskar_process_all_tiles(
         write_channel_intel(chTileConfig, tile_config);
         //printf("sent tile config %d num vis %d is final %d\n", tile, tile_config.num_tile_vis, tile_config.is_final);
 
+        int grid_w_prev = -1; 
 		// Loop over visibilities in the Tile.
 		for (int i = 0; i < num_tile_vis; i++)
 		{
@@ -156,7 +159,11 @@ __kernel void oskar_process_all_tiles(
             if (off_v < 0) v_fac = -1;
 
             struct ChDataVis vis;
-            vis.compact_start_index = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + wsupport*(2*wsupport + 1) + wsupport; 
+
+            vis.index_in_compact_kernel = abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + wsupport*(2*wsupport + 1) + wsupport; 
+            vis.compact_start_index = compact_start;
+            vis.conv_kernel_size = (oversample-1)*(2*wsupport+1)*(2*wsupport+1)*(oversample/2+2) + (2*wsupport)*(2*wsupport+2);
+
             vis.grid_local_u = grid_local_u;
             vis.grid_local_v = grid_local_v;
             vis.u_fac = u_fac;
@@ -168,6 +175,8 @@ __kernel void oskar_process_all_tiles(
             vis.wsupport = wsupport;
             vis.conv_mul = (float) conv_mul; 
             vis.val = val;
+            vis.load_new_conv_kernel = (grid_w==grid_w_prev ? 0 : 1);
+            grid_w_prev = grid_w;
 
             write_channel_intel(chVis, vis);
             
@@ -202,8 +211,15 @@ __kernel void convEng()
 
     #define MAX_TILE_WIDTH 64
     #define MAX_TILE_HEIGHT 64
+            
+    // initial version -- (oversample/2 + wsupport*oversample + 1)^2
+    //#define MAX_CONV_KERNEL_SIZE 84681
+
+    // further compacted version -- (oversample-1)*(2*wsupport+1)^2 * (oversample/2 + 2) + (2*wsupport)*(2*wsupport+2)
+    #define MAX_CONV_KERNEL_SIZE 273324
 
     float2 grid_local[MAX_TILE_WIDTH][MAX_TILE_HEIGHT];
+    float2 conv_kernel_local[MAX_CONV_KERNEL_SIZE];
 
     struct ChDataConvEngConfig conv_eng_config;
     conv_eng_config = read_channel_intel(chConvEngConfig);
@@ -224,13 +240,11 @@ __kernel void convEng()
         }
         //printf("received tile config. numVis: %d\n", tile_config.num_tile_vis);
         // Copy global grid to grid_local
-        __global float2 *restrict grid_pointer;
         for (int y=0; y<tileHeight; y++){
             for (int x=0; x<tileWidth; x++){
                 //! fix -- is this cast still required?
                 // copy pointer to local first
-                grid_pointer = (__global float2 *restrict)&tile_config.grid_pointer[y*trimmed_grid_size + x];
-                grid_local[y][x] = *grid_pointer;
+                grid_local[y][x] = tile_config.grid_pointer[y*trimmed_grid_size + x];
             }
         }
 
@@ -242,6 +256,11 @@ __kernel void convEng()
         {
             struct ChDataVis vis;
             vis = read_channel_intel(chVis);
+            if (vis.load_new_conv_kernel){
+                for (int i=0; i<vis.conv_kernel_size; i++){
+                    conv_kernel_local[i] = compact_wkernel[vis.compact_start_index + i];
+                }
+            }
 
             #pragma ivdep
             for (int j = vis.jstart; j <= vis.jend; ++j)
@@ -252,9 +271,9 @@ __kernel void convEng()
                 #pragma ivdep
                 for (int k = vis.kstart; k <= vis.kend; ++k)
                 {
-                    int p = vis.compact_start_index + j*vis.v_fac*(2*vis.wsupport+1) + k*vis.u_fac;
+                    int p = vis.index_in_compact_kernel + j*vis.v_fac*(2*vis.wsupport+1) + k*vis.u_fac;
 
-                    float2 c = compact_wkernel[p];
+                    float2 c = conv_kernel_local[p];
                     c.y *= vis.conv_mul;
 
                     // Real part only.
@@ -278,8 +297,7 @@ __kernel void convEng()
         for (int y=0; y<tileHeight; y++){
             for (int x=0; x<tileWidth; x++){
                 //! fix -- is this cast still required?
-                grid_pointer = (__global float2 *restrict)&tile_config.grid_pointer[y*trimmed_grid_size + x];
-                *grid_pointer = grid_local[y][x];
+                tile_config.grid_pointer[y*trimmed_grid_size + x] = grid_local[y][x];
             }
         }
 
