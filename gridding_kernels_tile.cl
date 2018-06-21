@@ -310,3 +310,106 @@ __kernel void convEng()
 #endif
 }
 
+__attribute__((max_global_work_dim(0)))
+__kernel void process_large_wsupport(
+        int num_w_planes,
+        __global const int* restrict support,
+        const int oversample,
+        const int conv_size_half,
+        __global const float* restrict conv_func,
+        const int num_points,
+        __global const float* restrict uu,
+        __global const float* restrict vv,
+        __global const float* restrict ww,
+        __global const float* restrict vis,
+        __global const float* restrict weight,
+        const float cell_size_rad,
+        const float w_scale,
+        const int trimmed_grid_size,
+        const int grid_size,
+        const int grid_topLeft_x, const int grid_topLeft_y,
+        __global float* restrict grid)
+{
+    int i;
+    const int kernel_dim = conv_size_half * conv_size_half;
+    const int grid_centre = grid_size / 2;
+    const float grid_scale = grid_size * cell_size_rad;
+
+    float norm=0;
+    float2 grid_local[145][145]; 
+
+    /* Loop over visibilities. */
+    int num_skipped = 0;
+    for (i = 0; i < num_points; ++i)
+    {
+        double sum = 0.0;
+        int j, k;
+
+        /* Convert UV coordinates to grid coordinates. */
+        const float pos_u = -uu[i] * grid_scale;
+        const float pos_v = vv[i] * grid_scale;
+        const float ww_i = ww[i];
+        const float conv_conj = (ww_i > 0.0f) ? -1.0f : 1.0f;
+        const int grid_w = (int)round(sqrt(fabs(ww_i * w_scale)));
+        const int grid_u = (int)round(pos_u) + grid_centre - grid_topLeft_x;
+        const int grid_v = (int)round(pos_v) + grid_centre - grid_topLeft_y;
+
+        /* Get visibility data. */
+        // hard code weight value to 1.0
+        const float weight_i = 1.0;
+        const float v_re = weight_i * vis[2 * i];
+        const float v_im = weight_i * vis[2 * i + 1];
+
+        /* Scaled distance from nearest grid point. */
+        const int off_u = (int)round((round(pos_u) - pos_u) * oversample);
+        const int off_v = (int)round((round(pos_v) - pos_v) * oversample);
+
+        /* Get kernel support size and start offset. */
+        const int w_support = grid_w < num_w_planes ?
+                support[grid_w] : support[num_w_planes - 1];
+
+        const int kernel_start = grid_w < num_w_planes ?
+                grid_w * kernel_dim : (num_w_planes - 1) * kernel_dim;
+
+        __global float2 *restrict grid_pointer;
+        grid_pointer = (__global float2 *restrict)grid;
+        //local grid
+        for (char y= -w_support; y <= w_support; y++) {
+            for (char x = -w_support; x <= w_support; x++) {
+                grid_pointer = (__global float2 * restrict)&grid[((grid_v+y)*trimmed_grid_size + (grid_u+x))*2];
+                grid_local[y+w_support][x+w_support] = *grid_pointer;
+            }
+        }
+
+        /* Convolve this point onto the grid. */
+        for (j = -w_support; j <= w_support; ++j) // maximum -70,70
+        {
+            int p1, t1;
+            p1 = grid_v + j; //corner of the convolution kernel 
+            p1 *= trimmed_grid_size; /* Tested to avoid int overflow. */
+            p1 += grid_u;
+            t1 = abs(off_v + j * oversample);
+            t1 *= conv_size_half;
+            t1 += kernel_start;
+            for (k = -w_support; k <= w_support; ++k)  //maximum -70, 70
+            {
+                int p = (t1 + abs(off_u + k * oversample)) << 1;
+                const float c_re = conv_func[p];
+                const float c_im = conv_func[p + 1] * conv_conj;
+                
+                p = (p1 + k) << 1;
+                grid_local[j+w_support][k+w_support] += (float2)((v_re * c_re - v_im * c_im), (v_im * c_re + v_re * c_im));
+                sum += c_re; /* Real part only. */
+            }
+        }
+
+        // put the grid back
+        for (char y= -w_support; y <= w_support; y++) {
+            for (char x = -w_support; x <= w_support; x++) {
+                grid_pointer = (__global float2 * restrict)&grid[((grid_v+y)*trimmed_grid_size + (grid_u+x))*2];
+                *grid_pointer = grid_local[y+w_support][x+w_support];
+            }
+        }
+    }
+}
+

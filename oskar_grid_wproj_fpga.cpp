@@ -118,6 +118,104 @@ void get_grid_hit_box(
 // Within these Tiles we'll also be sorting in order of wkernel so we'll be
 // counting how many points are at each grid_w value within the Tile. This is
 // known as a layered sort.
+void oskar_count_elements_in_tiles_layered_split(
+	const int num_w_planes, 
+	const int* support,
+	const int num_vis,
+	const float* uu, 
+	const float* vv,
+	const float* ww, 
+	const double cell_size_rad,
+	const double w_scale, 
+	const int grid_size, 
+	const Point boxTop,
+	const Point boxBot,
+	const int tileWidth,
+	const int tileHeight,
+	const Point numTiles,
+	std::vector<int> &numPointsInTilesLayered,
+	int *numPointsWithLargeWsupport
+	)
+{
+  const int g_centre = grid_size / 2;
+  const double scale = grid_size * cell_size_rad;
+  int numPointsWithLargeWsupportLocal = 0;
+
+#define NUM_POINTS_IN_TILES_LAYERED(uu, vv, ww)  numPointsInTilesLayered.at( ( (uu) + (vv)*numTiles.u )*num_w_planes + ww)
+#define NUM_POINTS_OUTSIDE_TILES_LAYERED(ww)     numPointsInTilesLayered.at( numTiles.v*numTiles.u*num_w_planes + ww )
+
+  // Loop over visibilities.
+#pragma omp parallel for default(shared) schedule(guided,5)
+  for (int i = 0; i < num_vis; i++)
+    {
+      // Convert UV coordinates to grid coordinates.
+      float pos_u = -uu[i] * scale;
+      float pos_v = vv[i] * scale;
+      float ww_i = ww[i];
+
+      const int grid_u = (int)round(pos_u) + g_centre;
+      const int grid_v = (int)round(pos_v) + g_centre;
+      int grid_w = (int)round(sqrt(fabs(ww_i * w_scale))); 
+      if(grid_w >= num_w_planes) grid_w = num_w_planes - 1;
+
+      // Catch points that would lie outside the grid.
+      const int wsupport = support[grid_w];
+      if (wsupport > 20){
+            numPointsWithLargeWsupportLocal++;
+            continue;
+      } 
+      if (grid_u + wsupport >= grid_size || grid_u - wsupport < 0 ||
+	  grid_v + wsupport >= grid_size || grid_v - wsupport < 0)
+	{
+	  continue;
+	}
+
+      // We compute the following in floating point:
+      //      boxTop.u + pu1*tileWidth <= grid_u - wsupport
+      //                                   grid_u + wsupport <= boxTop.u + pu2*tileWidth - 1
+      float fu1 = float(grid_u - wsupport - boxTop.u)/tileWidth;
+      float fu2 = float(grid_u + wsupport - boxTop.u + 1)/tileWidth;
+      // Intersect [fu1, fu2] with [0, numTiles.u)
+      float fu_int[] = { (fu1<0.0f ? 0.0f: fu1), (fu2>numTiles.u ? numTiles.u : fu2) };
+      int u_int[] = { floor(fu_int[0]), ceil(fu_int[1]) };
+
+      float fv1 = float(grid_v - wsupport - boxTop.v)/tileHeight;
+      float fv2 = float(grid_v + wsupport - boxTop.v + 1)/tileHeight;
+      // Intersect [fv1, fv2] with [0, numTiles.v)
+      float fv_int[] = { (fv1<0.0f ? 0.0f: fv1), (fv2>numTiles.v ? numTiles.v : fv2) };
+      int v_int[] = { floor(fv_int[0]), ceil(fv_int[1]) };
+
+      for (int pv=v_int[0]; pv < v_int[1]; pv++)
+	{
+	  for (int pu = u_int[0]; pu < u_int[1]; pu++)
+	    {
+              // Update the point counter.
+#pragma omp atomic
+	      NUM_POINTS_IN_TILES_LAYERED(pu, pv, grid_w) += 1;
+	    }
+	}
+      // Now need to check whether this grid point would also have hit grid areas
+      // not covered by any tiles.
+      if(   grid_u-wsupport < boxTop.u ||
+            grid_u+wsupport >= boxBot.u ||
+            grid_v-wsupport < boxTop.v ||
+            grid_v+wsupport >= boxBot.v )
+	{
+#pragma omp atomic
+	  NUM_POINTS_OUTSIDE_TILES_LAYERED(grid_w)++;
+	}
+    }
+
+    *numPointsWithLargeWsupport = numPointsWithLargeWsupportLocal;
+
+#undef NUM_POINTS_IN_TILES_LAYERED
+#undef NUM_POINTS_OUTSIDE_TILES_LAYERED
+}
+
+// Count how many visibilities are in each Tile that the grid is divided into.
+// Within these Tiles we'll also be sorting in order of wkernel so we'll be
+// counting how many points are at each grid_w value within the Tile. This is
+// known as a layered sort.
 void oskar_count_elements_in_tiles_layered(
 	const int num_w_planes, 
 	const int* support,
@@ -202,6 +300,172 @@ void oskar_count_elements_in_tiles_layered(
 
 #undef NUM_POINTS_IN_TILES_LAYERED
 #undef NUM_POINTS_OUTSIDE_TILES_LAYERED
+}
+
+// Sort the visibilities in Tiles into buckets so that adjacent visibilities will be processed
+// one after the other. Also sorts the visibilities within these buckets so that they are in order of wkernel level.
+void oskar_bucket_sort_layered_split(
+	   const int num_w_planes, 
+	   const int* support,
+	   const int num_vis,
+	   const float* uu, 
+	   const float* vv,
+	   const float* ww, 
+	   const float* vis, 
+	   const float* weight, 
+	   const double cell_size_rad,
+	   const double w_scale, 
+	   const int grid_size, 
+	   const Point boxTop,
+	   const Point boxBot,
+	   const int tileWidth,
+	   const int tileHeight,
+	   const Point numTiles,
+	   const std::vector<int> &offsetsPointsInTilesLayered,
+	   std::vector<int> &wk_offsetsPointsInTilesLayered,
+	   std::vector<float> & bucket_uu,
+	   std::vector<float> & bucket_vv,
+	   std::vector<float> & bucket_ww,
+	   std::vector<float2> & bucket_vis,
+	   std::vector<float> & bucket_weight,
+	   std::vector<float> & largeWSupport_uu,
+	   std::vector<float> & largeWSupport_vv,
+	   std::vector<float> & largeWSupport_ww,
+	   std::vector<float2> & largeWSupport_vis,
+	   std::vector<float> & largeWSupport_weight
+	   )
+{
+  auto start = std::chrono::high_resolution_clock::now();
+
+  const int g_centre = grid_size / 2;
+  const double scale = grid_size * cell_size_rad;
+
+  int largeWSupport_off=0;
+
+#define WK_OFFSETS_IN_TILES_LAYERED(uu, vv, ww)  wk_offsetsPointsInTilesLayered.at( ((uu) + (vv)*numTiles.u)*num_w_planes + ww)
+#define WK_OFFSETS_OUTSIDE_TILES_LAYERED(ww)     wk_offsetsPointsInTilesLayered.at( numTiles.u*numTiles.v*num_w_planes + ww )
+
+  // Loop over visibilities.
+#pragma omp parallel for default(shared) schedule(guided,5)
+  for (int i = 0; i < num_vis; i++)
+    {
+      // Convert UV coordinates to grid coordinates.
+      float pos_u = -uu[i] * scale;
+      float pos_v = vv[i] * scale;
+      float ww_i = ww[i];
+
+      const int grid_u = (int)round(pos_u) + g_centre;
+      const int grid_v = (int)round(pos_v) + g_centre;
+      int grid_w = (int)round(sqrt(fabs(ww_i * w_scale)));
+      if(grid_w >= num_w_planes) grid_w = num_w_planes - 1;
+
+      // Catch points that would lie outside the grid.
+      const int wsupport = support[grid_w];
+      if (wsupport > 20){
+	      // Atomic: get current offset and increment offset by one.
+	      int off;
+          #pragma omp atomic capture
+	      off = largeWSupport_off++;
+	   
+          // Add this visibility to the off^th position in the largeWSupport arrays;
+          // this ensures that the visibilities in the largeWSupports arrays according to which Tile
+          // they lie in and within that ordered by grid_w.
+	      largeWSupport_uu.at(off) = uu[i]; 
+	      largeWSupport_vv.at(off) = vv[i]; 
+	      largeWSupport_ww.at(off) = ww[i]; 
+
+	      float2 v;
+	      v.x = vis[2 * i];
+	      v.y = vis[2 * i + 1];
+	      largeWSupport_vis.at(off) = v; 
+	      largeWSupport_weight.at(off) = weight[i];
+          continue;
+      }
+        
+      if (grid_u + wsupport >= grid_size || grid_u - wsupport < 0 ||
+	  grid_v + wsupport >= grid_size || grid_v - wsupport < 0)
+	{
+	  continue;
+	}
+
+      float fu1 = float(grid_u - wsupport - boxTop.u)/tileWidth;
+      float fu2 = float(grid_u + wsupport - boxTop.u + 1)/tileWidth;
+      // Intersect [fu1, fu2] with [0, numTiles.u)
+      float fu_int[] = { (fu1<0.0f ? 0.0f: fu1), (fu2>numTiles.u ? numTiles.u : fu2) };
+      int u_int[] = { floor(fu_int[0]), ceil(fu_int[1]) };
+
+      float fv1 = float(grid_v - wsupport - boxTop.v)/tileHeight;
+      float fv2 = float(grid_v + wsupport - boxTop.v + 1)/tileHeight;
+      // Intersect [fv1, fv2] with [0, numTiles.v)
+      float fv_int[] = { (fv1<0.0f ? 0.0f: fv1), (fv2>numTiles.v ? numTiles.v : fv2) };
+      int v_int[] = { floor(fv_int[0]), ceil(fv_int[1]) };
+
+
+      for (int pv=v_int[0]; pv < v_int[1]; pv++)
+	{
+	  for (int pu = u_int[0]; pu < u_int[1]; pu++)
+	    {
+	      // Atomic: get current offset and increment offset by one.
+	      int off;
+#pragma omp atomic capture
+	      off = WK_OFFSETS_IN_TILES_LAYERED(pu, pv, grid_w)++;
+	   
+#ifdef USEASSERTS
+	      int idx = (pu + pv*numTiles.u)*num_w_planes + grid_w;
+	      assert(off+1 <= offsetsPointsInTilesLayered.at(idx+1) );
+#endif
+	   
+              // Add this visibility to the off^th position in the bucket arrays;
+              // this ensures that the visibilities in the buckets arrays according to which Tile
+              // they lie in and within that ordered by grid_w.
+	      bucket_uu.at(off) = uu[i]; 
+	      bucket_vv.at(off) = vv[i]; 
+	      bucket_ww.at(off) = ww[i]; 
+
+	      float2 v;
+	      v.x = vis[2 * i];
+	      v.y = vis[2 * i + 1];
+	      bucket_vis.at(off) = v; 
+	      bucket_weight.at(off) = weight[i];
+	    }
+	}
+      
+      // Now need to check whether this grid point would also have hit grid areas
+      // not covered by any tiles.
+      if(   grid_u-wsupport < boxTop.u ||
+            grid_u+wsupport >= boxBot.u ||
+            grid_v-wsupport < boxTop.v ||
+            grid_v+wsupport >= boxBot.v )
+	{
+	  // Atomic: get current offset and increment offset by one.
+	  int off;
+#pragma omp atomic capture	
+	  off = WK_OFFSETS_OUTSIDE_TILES_LAYERED(grid_w)++;
+	
+#ifdef USEASSERTS
+	  int idx = numTiles.u*numTiles.v*num_w_planes + grid_w;
+	  assert(off+1 <= offsetsPointsInTilesLayered.at(idx+1) );
+	  assert(off   < bucket_uu.size() );
+#endif
+	 
+	  bucket_uu.at(off) = uu[i]; 
+	  bucket_vv.at(off) = vv[i]; 
+	  bucket_ww.at(off) = ww[i]; 
+
+	  float2 v;
+	  v.x = vis[2 * i];
+	  v.y = vis[2 * i + 1];
+	  bucket_vis.at(off) = v; 
+	  bucket_weight.at(off) = weight[i];
+	}
+    }
+
+  auto stop = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> diff = stop-start;
+  printf("Bucket sort time: %gms\n", diff.count()*1000);
+
+#undef WK_OFFSETS_IN_TILES_LAYERED
+#undef WK_OFFSETS_OUTSIDE_TILES_LAYERED  
 }
 
 // Sort the visibilities in Tiles into buckets so that adjacent visibilities will be processed
@@ -715,10 +979,12 @@ printf("num_vis: %d\n", num_vis);
   numPointsInTilesLayered.resize((nTiles+1)*num_w_planes, 0);
 
   //time3 = omp_get_wtime();
+  int numPointsWithLargeWSupport=0;
 
   // Count how many visibilities fall into each Tile
-  oskar_count_elements_in_tiles_layered(num_w_planes, support, num_vis, uu, vv, ww, cell_size_rad, w_scale, 
-			     grid_size, boxTop, boxBot, tileWidth, tileHeight, numTiles, numPointsInTilesLayered);
+  oskar_count_elements_in_tiles_layered_split(num_w_planes, support, num_vis, uu, vv, ww, cell_size_rad, w_scale, 
+			     grid_size, boxTop, boxBot, tileWidth, tileHeight, numTiles, numPointsInTilesLayered,
+                 &numPointsWithLargeWSupport);
 
   //time4 = omp_get_wtime() - time3;
   //printf("Counting elements in tiles in: %fms\n",time4*1000);
@@ -787,7 +1053,9 @@ printf("num_vis: %d\n", num_vis);
   offsetsPointsInTiles.at(nTiles+1) = totalVisibilities;
   // Create some arrays for the bucket sort.
   std::vector<float> bucket_uu(totalVisibilities), bucket_vv(totalVisibilities), bucket_ww(totalVisibilities), bucket_weight(totalVisibilities);
+  std::vector<float> largeWSupport_uu(numPointsWithLargeWSupport), largeWSupport_vv(numPointsWithLargeWSupport), largeWSupport_ww(numPointsWithLargeWSupport), largeWSupport_weight(numPointsWithLargeWSupport);
   std::vector<float2> bucket_vis(totalVisibilities);
+  std::vector<float2> largeWSupport_vis(numPointsWithLargeWSupport);
   std::vector<int> wk_offsetsPointsInTiles( offsetsPointsInTiles.size() );
   std::vector<int> wk_offsetsPointsInTilesLayered( offsetsPointsInTilesLayered.size() );
   for(int i=0; i<offsetsPointsInTiles.size(); i++) wk_offsetsPointsInTiles.at(i) = offsetsPointsInTiles.at(i);
@@ -795,11 +1063,12 @@ printf("num_vis: %d\n", num_vis);
 
   // Do the bucket sort. This is a layered sort: we return the bucket arrays with the visibilities sorted according
   // to the Tiles affected and, within each Tile, also in order of grid_w, the layer of the wkernel used.
-  oskar_bucket_sort_layered(num_w_planes, support, num_vis, uu, vv, ww, vis, weight, cell_size_rad,
+  oskar_bucket_sort_layered_split(num_w_planes, support, num_vis, uu, vv, ww, vis, weight, cell_size_rad,
 				w_scale, grid_size, 
 				boxTop, boxBot, tileWidth, tileHeight, numTiles, 
 				offsetsPointsInTilesLayered, wk_offsetsPointsInTilesLayered,
-			        bucket_uu, bucket_vv, bucket_ww, bucket_vis, bucket_weight);
+			        bucket_uu, bucket_vv, bucket_ww, bucket_vis, bucket_weight,
+                    largeWSupport_uu, largeWSupport_vv, largeWSupport_ww, largeWSupport_vis, largeWSupport_weight);
 
     /*===================================================================*/
     /* Init OpenCL */

@@ -73,6 +73,26 @@ void get_grid_hit_box(
       );
 
 // Count how many visibilities are in each Tile that the grid is divided into.
+void oskar_count_elements_in_tiles_layered_split(
+    const int num_w_planes,
+    const int* support,
+    const int num_vis,
+    const float* uu,
+    const float* vv,
+    const float* ww,
+    const double cell_size_rad,
+    const double w_scale,
+    const int grid_size,
+    const Point boxTop,
+    const Point boxBot,
+    const int tileWidth,
+    const int tileHeight,
+    const Point numTiles,
+    std::vector<int> &numPointsInTilesLayered,
+    int *numPointsWithLargeWsupport
+    );
+
+// Count how many visibilities are in each Tile that the grid is divided into.
 void oskar_count_elements_in_tiles_layered(
       const int num_w_planes, 
       const int* support,
@@ -89,7 +109,41 @@ void oskar_count_elements_in_tiles_layered(
       const int tileHeight,
       const Point numTiles,
       std::vector<int> &numPointsInTilesLayered
-      );
+);
+
+// Sort the visibilities in Tiles into buckets so that adjacent visibilities will be processed
+// one after the other. Also sorts the visibilities so that within each Tile they are in order
+// of wkernel level.
+void oskar_bucket_sort_layered_split(
+       const int num_w_planes,
+       const int* support,
+       const int num_vis,
+       const float* uu,
+       const float* vv,
+       const float* ww,
+       const float* vis,
+       const float* weight,
+       const double cell_size_rad,
+       const double w_scale,
+       const int grid_size,
+       const Point boxTop,
+       const Point boxBot,
+       const int tileWidth,
+       const int tileHeight,
+       const Point numTiles,
+       const std::vector<int> &offsetsPointsInTilesLayered,
+       std::vector<int> &wk_offsetsPointsInTilesLayered,
+       std::vector<float> & bucket_uu,
+       std::vector<float> & bucket_vv,
+       std::vector<float> & bucket_ww,
+       std::vector<float2> & bucket_vis,
+       std::vector<float> & bucket_weight,
+       std::vector<float> & largeWSupport_uu,
+       std::vector<float> & largeWSupport_vv,
+       std::vector<float> & largeWSupport_ww,
+       std::vector<float2> & largeWSupport_vis,
+       std::vector<float> & largeWSupport_weight
+       );
 
 // Sort the visibilities in Tiles into buckets so that adjacent visibilities will be processed
 // one after the other. Also sorts the visibilities so that within each Tile they are in order
@@ -118,7 +172,7 @@ void oskar_bucket_sort_layered(
       std::vector<float> & bucket_ww,
       std::vector<float2> & bucket_vis,
       std::vector<float> & bucket_weight
-      );
+);
 
 /*
 // Process the Tiles outside of the central box.
