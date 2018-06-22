@@ -1,0 +1,789 @@
+{
+  "columns":
+  ["", "Pipelined", "II", "Bottleneck", "Details"]
+  , "children":
+  [
+    {
+      "name":"Kernel: oskar_process_all_tiles"
+      , "data":
+      ["", "", ""]
+      , "debug":
+      [
+        [
+          {
+            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+            , "line":54
+          }
+        ]
+      ]
+      , "details":
+      [
+        {
+          "type":"brief"
+          , "text":"Single work-item execution"
+        }
+        , {
+          "type":"text"
+          , "text":"Single work-item execution"
+        }
+        , {
+          "type":"text"
+          , "text":"See %L for more information"
+          , "links":
+          [
+            {
+              "guide":"Best Practices Guide : Kernels"
+              , "link":"https://www.altera.com/documentation/mwh1391807516407.html#ipp1476408832230"
+            }
+          ]
+        }
+      ]
+      , "children":
+      [
+        {
+          "name":"oskar_process_all_tiles.B1"
+          , "data":
+          ["Yes", ">=1", "n/a"]
+          , "debug":
+          [
+            [
+              {
+                "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                , "line":82
+              }
+            ]
+            , [
+              {
+                "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                , "line":82
+              }
+            ]
+          ]
+          , "details":
+          [
+            {
+              "type":"brief"
+              , "text":" "
+            }
+            , {
+              "type":"text"
+              , "text":"II is an approximation due to variable inner loop trip count."
+              , "links":
+              [
+                {
+                  "view":"Verification statistics"
+                }
+              ]
+            }
+          ]
+          , "children":
+          [
+            {
+              "name":"oskar_process_all_tiles.B2"
+              , "data":
+              ["Yes", "~1", "n/a"]
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":107
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":107
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":146
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":147
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":149
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":150
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":153
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":154
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":155
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":156
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":159
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":159
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":174
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"brief"
+                  , "text":"II is an approximation."
+                }
+                , {
+                  "type":"text"
+                  , "text":"II is an approximation due to the following stallable instructions:"
+                  , "links":
+                  [
+                    {
+                      "view":"Verification statistics"
+                    }
+                  ]
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"Load Operation (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"110"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"Load Operation (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"111"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"Load Operation (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"112"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"Load Operation (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"115"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"Load Operation (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"126"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"Load Operation (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"132"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"Channel Write Operation (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"172"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    , {
+      "name":"Kernel: convEng"
+      , "data":
+      ["", "", ""]
+      , "debug":
+      [
+        [
+          {
+            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+            , "line":193
+          }
+        ]
+      ]
+      , "details":
+      [
+        {
+          "type":"brief"
+          , "text":"Single work-item execution"
+        }
+        , {
+          "type":"text"
+          , "text":"Single work-item execution"
+        }
+        , {
+          "type":"text"
+          , "text":"See %L for more information"
+          , "links":
+          [
+            {
+              "guide":"Best Practices Guide : Kernels"
+              , "link":"https://www.altera.com/documentation/mwh1391807516407.html#ipp1476408832230"
+            }
+          ]
+        }
+      ]
+      , "children":
+      [
+        {
+          "name":"convEng.B1"
+          , "data":
+          ["No", "n/a", "n/a"]
+          , "debug":
+          [
+            [
+              {
+                "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                , "line":289
+              }
+            ]
+          ]
+          , "details":
+          [
+            {
+              "type":"brief"
+              , "text":"Out-of-order inner loop"
+            }
+            , {
+              "type":"text"
+              , "text":"Loop not pipelined due to:"
+              , "details":
+              [
+                {
+                  "type":"text"
+                  , "text":"Loop iteration ordering: iterations of inner loop shown may get out of order with respect to the listed inner loop, as the number of iterations of the listed inner loop may be different for different iterations of this loop."
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"convEng.B7 (%L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"247"
+                        }
+                      ]
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"convEng.B8 (%L, %L)"
+                      , "links":
+                      [
+                        {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"253"
+                        }
+                        , {
+                          "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                          , "line":"268"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"text"
+              , "text":"See %L for more information."
+              , "links":
+              [
+                {
+                  "guide":"Best Practices Guide : Nested Loops"
+                  , "link":"https://www.altera.com/documentation/mwh1391807516407.html#rfr1469543500580"
+                }
+              ]
+            }
+            , {
+              "type":"text"
+              , "text":"See %L for more information"
+              , "links":
+              [
+                {
+                  "guide":"Best Practices Guide : Nested Loops"
+                  , "link":"https://www.altera.com/documentation/mwh1391807516407.html#rfr1469543500580"
+                }
+              ]
+            }
+          ]
+          , "children":
+          [
+            {
+              "name":"convEng.B2"
+              , "data":
+              ["Yes", ">=1", "n/a"]
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":228
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":228
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"brief"
+                  , "text":" "
+                }
+                , {
+                  "type":"text"
+                  , "text":"II is an approximation due to variable inner loop trip count."
+                  , "links":
+                  [
+                    {
+                      "view":"Verification statistics"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"convEng.B3"
+                  , "data":
+                  ["Yes", "~1", "n/a"]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":229
+                      }
+                    ]
+                    , [
+                      {
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":229
+                      }
+                    ]
+                    , [
+                      {
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":234
+                      }
+                    ]
+                  ]
+                  , "details":
+                  [
+                    {
+                      "type":"brief"
+                      , "text":"II is an approximation."
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"II is an approximation due to the following stallable instruction:"
+                      , "links":
+                      [
+                        {
+                          "view":"Verification statistics"
+                        }
+                      ]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Load Operation (%L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"233"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                  , "children":
+                  [
+                  ]
+                }
+              ]
+            }
+            , {
+              "name":"convEng.B6"
+              , "data":
+              ["No", "n/a", "n/a"]
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":241
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":241
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"brief"
+                  , "text":"Out-of-order inner loop"
+                }
+                , {
+                  "type":"text"
+                  , "text":"Loop not pipelined due to:"
+                  , "details":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"Loop iteration ordering: iterations of inner loop shown may get out of order with respect to the listed inner loop, as the number of iterations of the listed inner loop may be different for different iterations of this loop."
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"convEng.B7 (%L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"247"
+                            }
+                          ]
+                        }
+                        , {
+                          "type":"text"
+                          , "text":"convEng.B8 (%L, %L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"253"
+                            }
+                            , {
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"268"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+                , {
+                  "type":"text"
+                  , "text":"See %L for more information."
+                  , "links":
+                  [
+                    {
+                      "guide":"Best Practices Guide : Loops in a Single Work-Item Kernel"
+                      , "link":"https://www.altera.com/documentation/mwh1391807516407.html#wfa1476380079940"
+                    }
+                  ]
+                }
+                , {
+                  "type":"text"
+                  , "text":"See %L for more information"
+                  , "links":
+                  [
+                    {
+                      "guide":"Best Practices Guide : Nested Loops"
+                      , "link":"https://www.altera.com/documentation/mwh1391807516407.html#rfr1469543500580"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"convEng.B7"
+                  , "data":
+                  ["Yes", ">=1", "n/a"]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":247
+                      }
+                    ]
+                    , [
+                      {
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":247
+                      }
+                    ]
+                  ]
+                  , "details":
+                  [
+                    {
+                      "type":"brief"
+                      , "text":" "
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"II is an approximation due to variable inner loop trip count."
+                      , "links":
+                      [
+                        {
+                          "view":"Verification statistics"
+                        }
+                      ]
+                    }
+                  ]
+                  , "children":
+                  [
+                    {
+                      "name":"convEng.B8"
+                      , "data":
+                      ["Yes", "~1", "n/a"]
+                      , "debug":
+                      [
+                        [
+                          {
+                            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                            , "line":253
+                          }
+                        ]
+                        , [
+                          {
+                            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                            , "line":253
+                          }
+                        ]
+                        , [
+                          {
+                            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                            , "line":268
+                          }
+                        ]
+                      ]
+                      , "details":
+                      [
+                        {
+                          "type":"brief"
+                          , "text":"II is an approximation."
+                        }
+                        , {
+                          "type":"text"
+                          , "text":"II is an approximation due to the following stallable instruction:"
+                          , "links":
+                          [
+                            {
+                              "view":"Verification statistics"
+                            }
+                          ]
+                          , "details":
+                          [
+                            {
+                              "type":"text"
+                              , "text":"Load Operation (%L)"
+                              , "links":
+                              [
+                                {
+                                  "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                                  , "line":"257"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                      , "children":
+                      [
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "name":"convEng.B11"
+              , "data":
+              ["Yes", ">=1", "n/a"]
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":278
+                  }
+                ]
+                , [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":278
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"brief"
+                  , "text":" "
+                }
+                , {
+                  "type":"text"
+                  , "text":"II is an approximation due to variable inner loop trip count."
+                  , "links":
+                  [
+                    {
+                      "view":"Verification statistics"
+                    }
+                  ]
+                }
+              ]
+              , "children":
+              [
+                {
+                  "name":"convEng.B12"
+                  , "data":
+                  ["Yes", "~1", "n/a"]
+                  , "debug":
+                  [
+                    [
+                      {
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":279
+                      }
+                    ]
+                    , [
+                      {
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":279
+                      }
+                    ]
+                    , [
+                      {
+                        "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                        , "line":283
+                      }
+                    ]
+                  ]
+                  , "details":
+                  [
+                    {
+                      "type":"brief"
+                      , "text":"II is an approximation."
+                    }
+                    , {
+                      "type":"text"
+                      , "text":"II is an approximation due to the following stallable instruction:"
+                      , "links":
+                      [
+                        {
+                          "view":"Verification statistics"
+                        }
+                      ]
+                      , "details":
+                      [
+                        {
+                          "type":"text"
+                          , "text":"Store Operation (%L)"
+                          , "links":
+                          [
+                            {
+                              "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                              , "line":"282"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                  , "children":
+                  [
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

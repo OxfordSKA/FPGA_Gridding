@@ -1,0 +1,8 @@
+{"name":"Info","rows":[
+{"name":"Project Name","data":["gridding_kernels_tile"],"classes":["info-table"]},
+{"name":"Target Family, Device, Board","data":["Arria 10, 10AX115S2F45I2SGES, a10_ref:a10gx"]},
+{"name":"AOC Version","data":["17.1.1 Build 273"]},
+{"name":"Quartus Version","data":["17.1.1 Build 273"]},
+{"name":"Command","data":["aoc -c -v ../gridding_kernels_tile.cl"]},
+{"name":"Reports Generated At", "data":["Fri Jun 22 11:09:01 2018"]}
+]}

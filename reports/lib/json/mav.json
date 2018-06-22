@@ -1,0 +1,2248 @@
+{
+  "nodes":
+  [
+    {
+      "type":"kernel"
+      , "id":2
+      , "name":"oskar_process_all_tiles"
+      , "children":
+      [
+        {
+          "type":"bb"
+          , "id":3
+          , "name":"oskar_process_all_tiles.B0"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":8
+              , "name":"Channel Write"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":78
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"192 bits"
+                  , "Depth":"1"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"1"
+                  , "Latency":"0"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Channels"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#qah1476410829821"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":26
+              , "name":"begin"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":27
+              , "name":"end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"8"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"8"
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":4
+          , "name":"oskar_process_all_tiles.B1"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":10
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":86
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"32 bits"
+                  , "Type":"Prefetching"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"5"
+                  , "Latency":"2"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":11
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":87
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"32 bits"
+                  , "Type":"Prefetching"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"5"
+                  , "Latency":"2"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":12
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":89
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"32 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"16"
+                  , "Latency":"128"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":13
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":90
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"32 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"16"
+                  , "Latency":"128"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":14
+              , "name":"Channel Write"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":103
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"128 bits"
+                  , "Depth":"4"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"156"
+                  , "Latency":"0"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Channels"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#qah1476410829821"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":28
+              , "name":"loop"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                  , "Loops To":"6"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":29
+              , "name":"end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"156"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"156"
+              , "II":"1"
+              , "Subloops":"Yes"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Entry to loop. "
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":5
+          , "name":"oskar_process_all_tiles.B2"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":16
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":110
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"32 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"174"
+                  , "Latency":"128"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":17
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":111
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"32 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"174"
+                  , "Latency":"128"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":18
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":112
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"32 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"5"
+                  , "Latency":"128"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":19
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":115
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"64 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"174"
+                  , "Latency":"128"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":20
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":126
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"32 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"174"
+                  , "Latency":"128"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":21
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":132
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"32 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"174"
+                  , "Latency":"128"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":22
+              , "name":"Channel Write"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":172
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"448 bits"
+                  , "Depth":"16"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"371"
+                  , "Latency":"0"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Channels"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#qah1476410829821"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":30
+              , "name":"loop"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                  , "Loops To":"31"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":31
+              , "name":"loop end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"371"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"371"
+              , "II":"1"
+              , "Subloops":"No"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":""
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":6
+          , "name":"oskar_process_all_tiles.B3"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"0"
+              , "II":"1"
+              , "Subloops":"Yes"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Exit which branches back to loop. "
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":7
+          , "name":"oskar_process_all_tiles.B4"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":24
+              , "name":"Channel Read"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":179
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"8 bits"
+                  , "Depth":"1"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"0"
+                  , "Latency":"0"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Channels"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#qah1476410829821"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":32
+              , "name":"begin"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":33
+              , "name":"end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"0"
+            }
+          ]
+        }
+      ]
+    }
+    , {
+      "type":"kernel"
+      , "id":35
+      , "name":"convEng"
+      , "children":
+      [
+        {
+          "type":"bb"
+          , "id":36
+          , "name":"convEng.B0"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":51
+              , "name":"Channel Read"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":209
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"192 bits"
+                  , "Depth":"1"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"2"
+                  , "Latency":"0"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Channels"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#qah1476410829821"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":62
+              , "name":"begin"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":63
+              , "name":"end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"2"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"2"
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":37
+          , "name":"convEng.B1"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":52
+              , "name":"Channel Read"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":223
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"128 bits"
+                  , "Depth":"4"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"1"
+                  , "Latency":"0"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Channels"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#qah1476410829821"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":64
+              , "name":"loop"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                  , "Loops To":"75"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":65
+              , "name":"end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"1"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"1"
+              , "II":"0"
+              , "Subloops":"Yes"
+              , "Pipelined":"No"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Entry to loop. "
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":38
+          , "name":"convEng.B2"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"7"
+              , "II":"1"
+              , "Subloops":"Yes"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Entry to loop. "
+              , "Loops To":"40"
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":39
+          , "name":"convEng.B3"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":53
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":233
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"64 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"5"
+                  , "Latency":"160"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":54
+              , "name":"Store"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":233
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"64 bits"
+                  , "Type":"Pipelined"
+                  , "Stall-free":"Yes"
+                  , "Stores to":"grid_local"
+                  , "Start Cycle":"166"
+                  , "Latency":"1"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":66
+              , "name":"loop"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                  , "Loops To":"67"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":67
+              , "name":"loop end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"167"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"167"
+              , "II":"1"
+              , "Subloops":"No"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":""
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":40
+          , "name":"convEng.B4"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"0"
+              , "II":"1"
+              , "Subloops":"Yes"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Exit which branches back to loop. "
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":41
+          , "name":"convEng.B5"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"0"
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":42
+          , "name":"convEng.B6"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":55
+              , "name":"Channel Read"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":244
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"448 bits"
+                  , "Depth":"16"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"1"
+                  , "Latency":"0"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Channels"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#qah1476410829821"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":68
+              , "name":"loop"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                  , "Loops To":"46"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":69
+              , "name":"end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"7"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"7"
+              , "II":"0"
+              , "Subloops":"Yes"
+              , "Pipelined":"No"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Entry to loop. "
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":43
+          , "name":"convEng.B7"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"8"
+              , "II":"1"
+              , "Subloops":"Yes"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Entry to loop. "
+              , "Loops To":"45"
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":44
+          , "name":"convEng.B8"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":56
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":257
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"64 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"9"
+                  , "Latency":"160"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":57
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":266
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"64 bits"
+                  , "Type":"Pipelined"
+                  , "Stall-free":"Yes"
+                  , "Loads from":"grid_local"
+                  , "Start Cycle":"177"
+                  , "Latency":"3"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":58
+              , "name":"Store"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":266
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"64 bits"
+                  , "Type":"Pipelined"
+                  , "Stall-free":"Yes"
+                  , "Stores to":"grid_local"
+                  , "Start Cycle":"184"
+                  , "Latency":"1"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":70
+              , "name":"loop"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                  , "Loops To":"71"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":71
+              , "name":"loop end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"188"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"188"
+              , "II":"1"
+              , "Subloops":"No"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":""
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":45
+          , "name":"convEng.B9"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"0"
+              , "II":"1"
+              , "Subloops":"Yes"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Exit which branches back to loop. "
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":46
+          , "name":"convEng.B10"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"0"
+              , "II":"0"
+              , "Subloops":"Yes"
+              , "Pipelined":"No"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Exit which branches back to loop. "
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":47
+          , "name":"convEng.B11"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"7"
+              , "II":"1"
+              , "Subloops":"Yes"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Entry to loop. "
+              , "Loops To":"49"
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":48
+          , "name":"convEng.B12"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":59
+              , "name":"Load"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":282
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"64 bits"
+                  , "Type":"Pipelined"
+                  , "Stall-free":"Yes"
+                  , "Loads from":"grid_local"
+                  , "Start Cycle":"2"
+                  , "Latency":"3"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":60
+              , "name":"Store"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":282
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"64 bits"
+                  , "Type":"Burst-coalesced"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"9"
+                  , "Latency":"56"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Load-Store Units"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#yeo1491314105959"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":72
+              , "name":"loop"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                  , "Loops To":"73"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":73
+              , "name":"loop end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"65"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"65"
+              , "II":"1"
+              , "Subloops":"No"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":""
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":49
+          , "name":"convEng.B13"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"0"
+              , "II":"1"
+              , "Subloops":"Yes"
+              , "Pipelined":"Yes"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Exit which branches back to loop. "
+            }
+          ]
+        }
+        , {
+          "type":"bb"
+          , "id":50
+          , "name":"convEng.B14"
+          , "children":
+          [
+            {
+              "type":"inst"
+              , "id":61
+              , "name":"Channel Write"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":287
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Width":"8 bits"
+                  , "Depth":"1"
+                  , "Stall-free":"No"
+                  , "Start Cycle":"0"
+                  , "Latency":"0"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Channels"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#qah1476410829821"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":74
+              , "name":"begin"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                }
+              ]
+            }
+            , {
+              "type":"inst"
+              , "id":75
+              , "name":"loop end"
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Start Cycle":"0"
+                  , "Latency":"1"
+                }
+              ]
+            }
+          ]
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Latency":"0"
+              , "II":"0"
+              , "Subloops":"Yes"
+              , "Pipelined":"No"
+              , "Fmax Bottlenecks":"No"
+              , "Loop Info":"Exit which branches back to loop. "
+            }
+          ]
+        }
+        , {
+          "type":"memtype"
+          , "id":76
+          , "name":"Local Memory"
+          , "children":
+          [
+            {
+              "type":"memsys"
+              , "id":77
+              , "name":"grid_local"
+              , "debug":
+              [
+                [
+                  {
+                    "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+                    , "line":206
+                  }
+                ]
+              ]
+              , "details":
+              [
+                {
+                  "type":"table"
+                  , "Requested size":"32768 bytes"
+                  , "Implemented size":"32768 bytes"
+                  , "Number of banks":"1"
+                  , "Bank width":"64 bits"
+                  , "Bank depth":"4096 words"
+                  , "Total replication":"1"
+                  , "Reference":
+                  [
+                    {
+                      "type":"text"
+                      , "text":"See %L for more information"
+                      , "links":
+                      [
+                        {
+                          "guide":"Best Practices Guide : Local Memory"
+                          , "link":"https://www.altera.com/documentation/mwh1391807516407.html#chn1469549457114"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    , {
+      "type":"memtype"
+      , "id":1
+      , "name":"Global Memory"
+      , "children":
+      [
+        {
+          "type":"memsys"
+          , "id":34
+          , "name":"DDR"
+          , "details":
+          [
+            {
+              "type":"table"
+              , "Number of banks":"1"
+            }
+          ]
+        }
+      ]
+    }
+    , {
+      "type":"channel"
+      , "id":9
+      , "name":"chConvEngConfig"
+      , "debug":
+      [
+        [
+          {
+            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+            , "line":54
+          }
+        ]
+      ]
+      , "details":
+      [
+        {
+          "type":"table"
+          , "Width":"192 bits"
+          , "Depth":"1"
+        }
+      ]
+    }
+    , {
+      "type":"channel"
+      , "id":25
+      , "name":"chConvEngFinished"
+      , "debug":
+      [
+        [
+          {
+            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+            , "line":54
+          }
+        ]
+      ]
+      , "details":
+      [
+        {
+          "type":"table"
+          , "Width":"8 bits"
+          , "Depth":"1"
+        }
+      ]
+    }
+    , {
+      "type":"channel"
+      , "id":15
+      , "name":"chTileConfig"
+      , "debug":
+      [
+        [
+          {
+            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+            , "line":54
+          }
+        ]
+      ]
+      , "details":
+      [
+        {
+          "type":"table"
+          , "Width":"128 bits"
+          , "Depth":"4"
+        }
+      ]
+    }
+    , {
+      "type":"channel"
+      , "id":23
+      , "name":"chVis"
+      , "debug":
+      [
+        [
+          {
+            "filename":"/home/ania/git_tile_v7/gridding_kernels_tile.cl"
+            , "line":54
+          }
+        ]
+      ]
+      , "details":
+      [
+        {
+          "type":"table"
+          , "Width":"448 bits"
+          , "Depth":"16"
+        }
+      ]
+    }
+  ]
+  , "links":
+  [
+    {
+      "from":8
+      , "to":9
+    }
+    , {
+      "from":14
+      , "to":15
+    }
+    , {
+      "from":22
+      , "to":23
+    }
+    , {
+      "from":25
+      , "to":24
+    }
+    , {
+      "from":8
+      , "to":27
+    }
+    , {
+      "from":6
+      , "to":28
+    }
+    , {
+      "from":27
+      , "to":28
+    }
+    , {
+      "from":10
+      , "to":29
+    }
+    , {
+      "from":11
+      , "to":29
+    }
+    , {
+      "from":12
+      , "to":29
+    }
+    , {
+      "from":13
+      , "to":29
+    }
+    , {
+      "from":14
+      , "to":29
+    }
+    , {
+      "from":31
+      , "to":30
+    }
+    , {
+      "from":29
+      , "to":30
+    }
+    , {
+      "from":16
+      , "to":31
+    }
+    , {
+      "from":17
+      , "to":31
+    }
+    , {
+      "from":18
+      , "to":31
+    }
+    , {
+      "from":19
+      , "to":31
+    }
+    , {
+      "from":20
+      , "to":31
+    }
+    , {
+      "from":21
+      , "to":31
+    }
+    , {
+      "from":22
+      , "to":31
+    }
+    , {
+      "from":31
+      , "to":6
+    }
+    , {
+      "from":6
+      , "to":32
+    }
+    , {
+      "from":24
+      , "to":33
+    }
+    , {
+      "from":26
+      , "to":8
+    }
+    , {
+      "from":28
+      , "to":10
+    }
+    , {
+      "from":28
+      , "to":11
+    }
+    , {
+      "from":10
+      , "to":12
+    }
+    , {
+      "from":11
+      , "to":12
+    }
+    , {
+      "from":10
+      , "to":13
+    }
+    , {
+      "from":11
+      , "to":13
+    }
+    , {
+      "from":10
+      , "to":14
+    }
+    , {
+      "from":11
+      , "to":14
+    }
+    , {
+      "from":13
+      , "to":14
+    }
+    , {
+      "from":30
+      , "to":16
+    }
+    , {
+      "from":30
+      , "to":17
+    }
+    , {
+      "from":30
+      , "to":18
+    }
+    , {
+      "from":30
+      , "to":19
+    }
+    , {
+      "from":18
+      , "to":20
+    }
+    , {
+      "from":18
+      , "to":21
+    }
+    , {
+      "from":16
+      , "to":22
+    }
+    , {
+      "from":17
+      , "to":22
+    }
+    , {
+      "from":18
+      , "to":22
+    }
+    , {
+      "from":19
+      , "to":22
+    }
+    , {
+      "from":20
+      , "to":22
+    }
+    , {
+      "from":21
+      , "to":22
+    }
+    , {
+      "from":32
+      , "to":24
+    }
+    , {
+      "from":34
+      , "to":17
+    }
+    , {
+      "from":34
+      , "to":11
+    }
+    , {
+      "from":34
+      , "to":20
+    }
+    , {
+      "from":34
+      , "to":21
+    }
+    , {
+      "from":34
+      , "to":12
+    }
+    , {
+      "from":34
+      , "to":10
+    }
+    , {
+      "from":34
+      , "to":13
+    }
+    , {
+      "from":34
+      , "to":16
+    }
+    , {
+      "from":34
+      , "to":19
+    }
+    , {
+      "from":34
+      , "to":18
+    }
+    , {
+      "from":9
+      , "to":51
+    }
+    , {
+      "from":15
+      , "to":52
+    }
+    , {
+      "from":23
+      , "to":55
+    }
+    , {
+      "from":61
+      , "to":25
+    }
+    , {
+      "from":77
+      , "to":57
+    }
+    , {
+      "from":77
+      , "to":59
+    }
+    , {
+      "from":54
+      , "to":77
+    }
+    , {
+      "from":58
+      , "to":77
+    }
+    , {
+      "from":51
+      , "to":63
+    }
+    , {
+      "from":75
+      , "to":64
+    }
+    , {
+      "from":63
+      , "to":64
+    }
+    , {
+      "from":52
+      , "to":65
+    }
+    , {
+      "from":40
+      , "to":38
+    }
+    , {
+      "from":65
+      , "to":38
+    }
+    , {
+      "from":67
+      , "to":66
+    }
+    , {
+      "from":38
+      , "to":66
+    }
+    , {
+      "from":53
+      , "to":67
+    }
+    , {
+      "from":54
+      , "to":67
+    }
+    , {
+      "from":67
+      , "to":40
+    }
+    , {
+      "from":40
+      , "to":41
+    }
+    , {
+      "from":46
+      , "to":68
+    }
+    , {
+      "from":41
+      , "to":68
+    }
+    , {
+      "from":55
+      , "to":69
+    }
+    , {
+      "from":45
+      , "to":43
+    }
+    , {
+      "from":69
+      , "to":43
+    }
+    , {
+      "from":71
+      , "to":70
+    }
+    , {
+      "from":43
+      , "to":70
+    }
+    , {
+      "from":56
+      , "to":71
+    }
+    , {
+      "from":58
+      , "to":71
+    }
+    , {
+      "from":71
+      , "to":45
+    }
+    , {
+      "from":45
+      , "to":46
+    }
+    , {
+      "from":49
+      , "to":47
+    }
+    , {
+      "from":46
+      , "to":47
+    }
+    , {
+      "from":73
+      , "to":72
+    }
+    , {
+      "from":47
+      , "to":72
+    }
+    , {
+      "from":59
+      , "to":73
+    }
+    , {
+      "from":60
+      , "to":73
+    }
+    , {
+      "from":73
+      , "to":49
+    }
+    , {
+      "from":49
+      , "to":74
+    }
+    , {
+      "from":61
+      , "to":75
+    }
+    , {
+      "from":64
+      , "to":52
+    }
+    , {
+      "from":66
+      , "to":53
+    }
+    , {
+      "from":53
+      , "to":54
+    }
+    , {
+      "from":68
+      , "to":55
+    }
+    , {
+      "from":70
+      , "to":56
+    }
+    , {
+      "from":56
+      , "to":57
+    }
+    , {
+      "from":57
+      , "to":58
+    }
+    , {
+      "from":72
+      , "to":59
+    }
+    , {
+      "from":59
+      , "to":60
+    }
+    , {
+      "from":74
+      , "to":61
+    }
+    , {
+      "from":34
+      , "to":53
+    }
+    , {
+      "from":34
+      , "to":56
+    }
+    , {
+      "from":60
+      , "to":34
+    }
+  ]
+}
