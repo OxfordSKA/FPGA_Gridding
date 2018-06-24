@@ -111,6 +111,25 @@ void oskar_count_elements_in_tiles_layered(
       std::vector<int> &numPointsInTilesLayered
 );
 
+void oskar_count_elements_in_tiles_layered_split_tile(
+    const int num_w_planes, 
+    const int* support,
+    const int num_vis,
+    const float* uu, 
+    const float* vv,
+    const float* ww, 
+    const double cell_size_rad,
+    const double w_scale, 
+    const int grid_size, 
+    const Point boxTop,
+    const Point boxBot,
+    const int tileWidth,
+    const int tileHeight,
+    const Point numTiles,
+    std::vector<int> &numPointsInTilesLayered,
+    std::vector<int> &tileHasLargeWSupport
+    );
+
 // Sort the visibilities in Tiles into buckets so that adjacent visibilities will be processed
 // one after the other. Also sorts the visibilities so that within each Tile they are in order
 // of wkernel level.

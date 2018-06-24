@@ -1,4 +1,0 @@
-{"rows":[
-{"name":"Kernels  convEng and oskar_process_all_tiles may form a cycle due to connectivity ..."
-,"details":["Compiler Warning: Kernels  convEng and oskar_process_all_tiles may form a cycle due to connectivity of channels  chConvEngConfig, chConvEngFinished, chTileConfig and chVis. Use mem_fence if you require source code-based ordering of channel operations. Channel depths cannot be optimized"]}
-]}

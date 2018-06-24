@@ -26,6 +26,8 @@
 
 #include "oskar_grid_wproj_fpga.hpp"
 
+#define MAX_W_SUPPORT_LOCAL 20
+
 using namespace aocl_utils;
 
 // How to sort Tiles by the number of visibilities they contain.
@@ -466,6 +468,100 @@ void oskar_bucket_sort_layered_split(
 
 #undef WK_OFFSETS_IN_TILES_LAYERED
 #undef WK_OFFSETS_OUTSIDE_TILES_LAYERED  
+}
+
+// Count how many visibilities are in each Tile that the grid is divided into.
+// Within these Tiles we'll also be sorting in order of wkernel so we'll be
+// counting how many points are at each grid_w value within the Tile. This is
+// known as a layered sort.
+void oskar_count_elements_in_tiles_layered_split_tile(
+	const int num_w_planes, 
+	const int* support,
+	const int num_vis,
+	const float* uu, 
+	const float* vv,
+	const float* ww, 
+	const double cell_size_rad,
+	const double w_scale, 
+	const int grid_size, 
+	const Point boxTop,
+	const Point boxBot,
+	const int tileWidth,
+	const int tileHeight,
+	const Point numTiles,
+	std::vector<int> &numPointsInTilesLayered,
+	std::vector<int> &tileHasLargeWSupport
+	)
+{
+  const int g_centre = grid_size / 2;
+  const double scale = grid_size * cell_size_rad;
+
+#define NUM_POINTS_IN_TILES_LAYERED(uu, vv, ww)  numPointsInTilesLayered.at( ( (uu) + (vv)*numTiles.u )*num_w_planes + ww)
+#define TILE_HAS_LARGE_W_SUPPORT(uu, vv)  tileHasLargeWSupport.at( (uu) + (vv)*numTiles.u )
+#define NUM_POINTS_OUTSIDE_TILES_LAYERED(ww)     numPointsInTilesLayered.at( numTiles.v*numTiles.u*num_w_planes + ww )
+
+  // Loop over visibilities.
+#pragma omp parallel for default(shared) schedule(guided,5)
+  for (int i = 0; i < num_vis; i++)
+    {
+      // Convert UV coordinates to grid coordinates.
+      float pos_u = -uu[i] * scale;
+      float pos_v = vv[i] * scale;
+      float ww_i = ww[i];
+
+      const int grid_u = (int)round(pos_u) + g_centre;
+      const int grid_v = (int)round(pos_v) + g_centre;
+      int grid_w = (int)round(sqrt(fabs(ww_i * w_scale))); 
+      if(grid_w >= num_w_planes) grid_w = num_w_planes - 1;
+
+      // Catch points that would lie outside the grid.
+      const int wsupport = support[grid_w];
+      if (grid_u + wsupport >= grid_size || grid_u - wsupport < 0 ||
+	  grid_v + wsupport >= grid_size || grid_v - wsupport < 0)
+	{
+	  continue;
+	}
+
+      // We compute the following in floating point:
+      //      boxTop.u + pu1*tileWidth <= grid_u - wsupport
+      //                                   grid_u + wsupport <= boxTop.u + pu2*tileWidth - 1
+      float fu1 = float(grid_u - wsupport - boxTop.u)/tileWidth;
+      float fu2 = float(grid_u + wsupport - boxTop.u + 1)/tileWidth;
+      // Intersect [fu1, fu2] with [0, numTiles.u)
+      float fu_int[] = { (fu1<0.0f ? 0.0f: fu1), (fu2>numTiles.u ? numTiles.u : fu2) };
+      int u_int[] = { floor(fu_int[0]), ceil(fu_int[1]) };
+
+      float fv1 = float(grid_v - wsupport - boxTop.v)/tileHeight;
+      float fv2 = float(grid_v + wsupport - boxTop.v + 1)/tileHeight;
+      // Intersect [fv1, fv2] with [0, numTiles.v)
+      float fv_int[] = { (fv1<0.0f ? 0.0f: fv1), (fv2>numTiles.v ? numTiles.v : fv2) };
+      int v_int[] = { floor(fv_int[0]), ceil(fv_int[1]) };
+
+      for (int pv=v_int[0]; pv < v_int[1]; pv++)
+	{
+	  for (int pu = u_int[0]; pu < u_int[1]; pu++)
+	    {
+              // Update the point counter.
+#pragma omp atomic
+	      NUM_POINTS_IN_TILES_LAYERED(pu, pv, grid_w) += 1;
+
+          if (wsupport>MAX_W_SUPPORT_LOCAL) TILE_HAS_LARGE_W_SUPPORT(pu, pv) = 1;
+	    }
+	}
+      // Now need to check whether this grid point would also have hit grid areas
+      // not covered by any tiles.
+      if(   grid_u-wsupport < boxTop.u ||
+            grid_u+wsupport >= boxBot.u ||
+            grid_v-wsupport < boxTop.v ||
+            grid_v+wsupport >= boxBot.v )
+	{
+#pragma omp atomic
+	  NUM_POINTS_OUTSIDE_TILES_LAYERED(grid_w)++;
+	}
+    }
+
+#undef NUM_POINTS_IN_TILES_LAYERED
+#undef NUM_POINTS_OUTSIDE_TILES_LAYERED
 }
 
 // Sort the visibilities in Tiles into buckets so that adjacent visibilities will be processed
@@ -979,12 +1075,24 @@ printf("num_vis: %d\n", num_vis);
   numPointsInTilesLayered.resize((nTiles+1)*num_w_planes, 0);
 
   //time3 = omp_get_wtime();
-  int numPointsWithLargeWSupport=0;
+  std::vector<int> tileHasLargeWSupport(nTiles+1);
+  std::fill(tileHasLargeWSupport.begin(), tileHasLargeWSupport.end(), 0);
+  // Count how many visibilities fall into each Tile
+  oskar_count_elements_in_tiles_layered_split_tile(num_w_planes, support, num_vis, uu, vv, ww, cell_size_rad, w_scale, 
+			     grid_size, boxTop, boxBot, tileWidth, tileHeight, numTiles, numPointsInTilesLayered,
+                 tileHasLargeWSupport);
+  int numTilesWithLargeWSupport = 0;
+  for (int i=0; i<nTiles+1; i++){
+        if (tileHasLargeWSupport.at(i)==1) numTilesWithLargeWSupport++;
+  }
+  printf("numTilesWithLargeWSupport: %d\n", numTilesWithLargeWSupport);
 
+  /*int numPointsWithLargeWSupport=0;
   // Count how many visibilities fall into each Tile
   oskar_count_elements_in_tiles_layered_split(num_w_planes, support, num_vis, uu, vv, ww, cell_size_rad, w_scale, 
 			     grid_size, boxTop, boxBot, tileWidth, tileHeight, numTiles, numPointsInTilesLayered,
                  &numPointsWithLargeWSupport);
+  */
 
   //time4 = omp_get_wtime() - time3;
   //printf("Counting elements in tiles in: %fms\n",time4*1000);
@@ -1053,9 +1161,9 @@ printf("num_vis: %d\n", num_vis);
   offsetsPointsInTiles.at(nTiles+1) = totalVisibilities;
   // Create some arrays for the bucket sort.
   std::vector<float> bucket_uu(totalVisibilities), bucket_vv(totalVisibilities), bucket_ww(totalVisibilities), bucket_weight(totalVisibilities);
-  std::vector<float> largeWSupport_uu(numPointsWithLargeWSupport), largeWSupport_vv(numPointsWithLargeWSupport), largeWSupport_ww(numPointsWithLargeWSupport), largeWSupport_weight(numPointsWithLargeWSupport);
+  //std::vector<float> largeWSupport_uu(numPointsWithLargeWSupport), largeWSupport_vv(numPointsWithLargeWSupport), largeWSupport_ww(numPointsWithLargeWSupport), largeWSupport_weight(numPointsWithLargeWSupport);
   std::vector<float2> bucket_vis(totalVisibilities);
-  std::vector<float2> largeWSupport_vis(numPointsWithLargeWSupport);
+ // std::vector<float2> largeWSupport_vis(numPointsWithLargeWSupport);
   std::vector<int> wk_offsetsPointsInTiles( offsetsPointsInTiles.size() );
   std::vector<int> wk_offsetsPointsInTilesLayered( offsetsPointsInTilesLayered.size() );
   for(int i=0; i<offsetsPointsInTiles.size(); i++) wk_offsetsPointsInTiles.at(i) = offsetsPointsInTiles.at(i);
@@ -1063,12 +1171,11 @@ printf("num_vis: %d\n", num_vis);
 
   // Do the bucket sort. This is a layered sort: we return the bucket arrays with the visibilities sorted according
   // to the Tiles affected and, within each Tile, also in order of grid_w, the layer of the wkernel used.
-  oskar_bucket_sort_layered_split(num_w_planes, support, num_vis, uu, vv, ww, vis, weight, cell_size_rad,
+  oskar_bucket_sort_layered(num_w_planes, support, num_vis, uu, vv, ww, vis, weight, cell_size_rad,
 				w_scale, grid_size, 
 				boxTop, boxBot, tileWidth, tileHeight, numTiles, 
 				offsetsPointsInTilesLayered, wk_offsetsPointsInTilesLayered,
-			        bucket_uu, bucket_vv, bucket_ww, bucket_vis, bucket_weight,
-                    largeWSupport_uu, largeWSupport_vv, largeWSupport_ww, largeWSupport_vis, largeWSupport_weight);
+			        bucket_uu, bucket_vv, bucket_ww, bucket_vis, bucket_weight);
 
     /*===================================================================*/
     /* Init OpenCL */
@@ -1172,6 +1279,13 @@ printf("num_vis: %d\n", num_vis);
     status = clEnqueueWriteBuffer(queue, d_offsetsPointsInTiles, CL_TRUE, 0,
             offsetsPointsInTiles.size() * sizeof(int), offsetsPointsInTiles.data(), 0, NULL, NULL);
 
+    cl_mem d_tileHasLargeWSupport = clCreateBuffer(context, CL_MEM_READ_ONLY,
+            tileHasLargeWSupport.size() * sizeof(int), NULL, &status);
+    status = clEnqueueWriteBuffer(queue, d_tileHasLargeWSupport, CL_TRUE, 0,
+            tileHasLargeWSupport.size() * sizeof(int), tileHasLargeWSupport.data(), 0, NULL, NULL);
+
+    cl_int d_numTilesWithLargeWSupport = numTilesWithLargeWSupport;
+
     cl_mem d_bucket_uu = clCreateBuffer(context, CL_MEM_READ_ONLY,
             totalVisibilities * sizeof(float), NULL, &status);
     status = clEnqueueWriteBuffer(queue, d_bucket_uu, CL_TRUE, 0,
@@ -1251,6 +1365,8 @@ printf("num_vis: %d\n", num_vis);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_numTiles_v);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_numPointsInTiles);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_offsetsPointsInTiles);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_tileHasLargeWSupport);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_numTilesWithLargeWSupport);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_uu);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_vv);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_ww);
@@ -1258,6 +1374,30 @@ printf("num_vis: %d\n", num_vis);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pu);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pv);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
+
+/*
+    kernelLarge = clCreateKernel(program, "process_large_wsupport", &status);
+
+int arg=0;
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_num_w_planes);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_support);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_oversample);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_conv_size_half);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_kernels);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_block_size);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_uu);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vv);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_ww);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_block);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_weight);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cellsize_rad);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_grid_topLeft_x);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_grid_topLeft_y);
+    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
+*/
 
     printf("finished init opencl\n");
     /*===================================================================*/
