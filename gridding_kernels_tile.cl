@@ -83,11 +83,50 @@ __kernel void oskar_process_all_tiles(
     {
         //printf("beginning of tile\n");
 		// Get some information about this Tile.
-		int pu = workQueue_pu[tile];
-		int pv = workQueue_pv[tile];
+        int pu, pv, off, num_tile_vis;
+        __global int* restrict ddr_access_pointer;
+        #pragma unroll 0
+        for (int i=0; i<4; i++){
+            switch (i){
+                case 0:{
+                    ddr_access_pointer = &workQueue_pu[tile];
+                    break;
+                }
+                case 1:{
+                    ddr_access_pointer = &workQueue_pv[tile];
+                    break;
+                }
+                case 2:{
+                    ddr_access_pointer = &(OFFSETS_IN_TILES(pu, pv));
+                    break;
+                }
+                case 3:{
+                    ddr_access_pointer = &(NUM_POINTS_IN_TILES(pu,pv));
+                    break;
+                }
+            }
 
-        const int off = OFFSETS_IN_TILES(pu, pv);
-		const int num_tile_vis = NUM_POINTS_IN_TILES(pu,pv);
+            int temp_int = *ddr_access_pointer;
+
+            switch (i){
+                case 0:{
+		            pu = temp_int;
+                    break;
+                }
+                case 1:{
+                    pv = temp_int;
+                    break;
+                }
+                case 2:{
+                    off = temp_int;
+                    break;
+                }
+                case 3:{
+                    num_tile_vis = temp_int;
+                    break;
+                }
+            }
+        }
 
         if (num_tile_vis==0 && (tile<nTiles-1)) continue;
 
