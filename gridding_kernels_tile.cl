@@ -1,5 +1,8 @@
 #pragma OPENCL EXTENSION cl_altera_channels : enable  //you need this
 
+
+#define CONV_UNROLL 4
+
 struct ChDataConvEngConfig{       // Fix -- might want to send these through per vis, instead of grid_w
     __global const float2* restrict compact_wkernel;
     int tileHeight, tileWidth;
@@ -187,6 +190,8 @@ __kernel void oskar_process_all_tiles(
 __attribute__((max_global_work_dim(0)))
 __attribute__((autorun))
 __attribute__((num_compute_units(1)))
+__attribute__((numbanks(CONV_UNROLL)))
+__attribute__((bankwidth(64)))
 __kernel void convEng()
 {
 
@@ -201,6 +206,7 @@ __kernel void convEng()
     #define MAX_TILE_WIDTH 64
     #define MAX_TILE_HEIGHT 64
 
+
     float2 grid_local[MAX_TILE_WIDTH][MAX_TILE_HEIGHT];
 
     struct ChDataConvEngConfig conv_eng_config;
@@ -214,21 +220,21 @@ __kernel void convEng()
     
     int count=0;
     while(1){
+        //printf("tile: %d\n", count++); 
         // Iterate over tiles
         struct ChDataTileConfig tile_config;
         //printf("in autorun final_iter: %d\n", final_iter);
         if (final_iter ==1){
             tile_config = read_channel_intel(chTileConfig); 
         }
-        //printf("received tile config. numVis: %d\n", tile_config.num_tile_vis);
+        //printf("received tile config. numVis: %d is final: %d\n", tile_config.num_tile_vis, tile_config.is_final);
         // Copy global grid to grid_local
-        __global float2 *restrict grid_pointer;
         for (int y=0; y<tileHeight; y++){
-            for (int x=0; x<tileWidth; x++){
-                //! fix -- is this cast still required?
-                // copy pointer to local first
-                grid_pointer = (__global float2 *restrict)&tile_config.grid_pointer[y*trimmed_grid_size + x];
-                grid_local[y][x] = *grid_pointer;
+            #pragma unroll CONV_UNROLL
+            for (int xx=0; xx<tileWidth; xx++){
+                int x = (xx%CONV_UNROLL)*(MAX_TILE_WIDTH/CONV_UNROLL) 
+                            + xx/CONV_UNROLL;
+                grid_local[y][x] = tile_config.grid_pointer[y*trimmed_grid_size + xx];
             }
         }
 
@@ -240,27 +246,28 @@ __kernel void convEng()
         {
             struct ChDataVis vis;
             vis = read_channel_intel(chVis);
-
+            
+            #pragma ivdep
             for (int j = vis.jstart; j <= vis.jend; ++j)
             {
                   // Compiler assumes there's a dependency but there isn't
                   // as threads don't access overlapping grid regions.
                   // So we have to tell the compiler explicitly to vectorise.
                 #pragma ivdep
-                for (int k = vis.kstart; k <= vis.kend; ++k)
+                #pragma unroll CONV_UNROLL
+                for (int kk = vis.kstart; kk <= vis.kend; ++kk)
                 {
-                    int p = vis.compact_start_index + j*vis.v_fac*(2*vis.wsupport+1) + k*vis.u_fac;
-
+                    int p = vis.compact_start_index + j*vis.v_fac*(2*vis.wsupport+1) + kk*vis.u_fac;
                     float2 c = compact_wkernel[p];
                     c.y *= vis.conv_mul;
 
                     // Real part only.
                     sum += c.x;
 
-                    //p = ((grid_v + j) * trimmed_grid_size) + grid_u + k;
-                    //grid[2*p]     += (vis.val.x * c.x - vis.val.y * c.y);
-                    //grid[2*p + 1] += (vis.val.y * c.x + vis.val.x * c.y);
-                    grid_local[vis.grid_local_v + j][vis.grid_local_u + k] +=
+                    int k = ((vis.grid_local_u+kk)%CONV_UNROLL)*(MAX_TILE_WIDTH/CONV_UNROLL) 
+                            + (vis.grid_local_u+kk)/CONV_UNROLL;
+
+                    grid_local[vis.grid_local_v + j][k] +=
                         (float2) ((vis.val.x * c.x - vis.val.y * c.y), (vis.val.y * c.x + vis.val.x * c.y));
                 }
             }
@@ -273,10 +280,11 @@ __kernel void convEng()
 
         // put the grid back
         for (int y=0; y<tileHeight; y++){
-            for (int x=0; x<tileWidth; x++){
-                //! fix -- is this cast still required?
-                grid_pointer = (__global float2 *restrict)&tile_config.grid_pointer[y*trimmed_grid_size + x];
-                *grid_pointer = grid_local[y][x];
+            #pragma unroll CONV_UNROLL
+            for (int xx=0; xx<tileWidth; xx++){
+                int x = (xx%CONV_UNROLL)*(MAX_TILE_WIDTH/CONV_UNROLL) 
+                            + xx/CONV_UNROLL;
+                tile_config.grid_pointer[y*trimmed_grid_size + xx] = grid_local[y][x];
             }
         }
 

@@ -1010,6 +1010,9 @@ printf("num_vis: %d\n", num_vis);
         auto start = std::chrono::high_resolution_clock::now();
 
         status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
+        void *param_value;
+        size_t param_value_size_ret;
+        clGetProfileDataDeviceIntelFPGA (device, program, 1, 1, 1, 1, param_value, &param_value_size_ret, &status);
         status = clFinish(queue);
 
         auto stop = std::chrono::high_resolution_clock::now();
