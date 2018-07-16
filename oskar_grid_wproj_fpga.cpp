@@ -25,8 +25,9 @@
 #endif
 
 #include "oskar_grid_wproj_fpga.hpp"
+#include "rearrange_kernels.hpp"
 
-#define MAX_W_SUPPORT_LOCAL 20
+#define MAX_W_SUPPORT_LOCAL 25
 
 using namespace aocl_utils;
 
@@ -162,7 +163,7 @@ void oskar_count_elements_in_tiles_layered_split(
 
       // Catch points that would lie outside the grid.
       const int wsupport = support[grid_w];
-      if (wsupport > 20){
+      if (wsupport > MAX_W_SUPPORT_LOCAL){
             numPointsWithLargeWsupportLocal++;
             continue;
       } 
@@ -363,7 +364,7 @@ void oskar_bucket_sort_layered_split(
 
       // Catch points that would lie outside the grid.
       const int wsupport = support[grid_w];
-      if (wsupport > 20){
+      if (wsupport > MAX_W_SUPPORT_LOCAL){
 	      // Atomic: get current offset and increment offset by one.
 	      int off;
           #pragma omp atomic capture
@@ -1021,7 +1022,10 @@ printf("num_vis: %d\n", num_vis);
   // First of all, reduce the amount of space that the wkernels occupy and reorder them
   // to be more cache and vectorisation friendly. As this could be done at the point the
   // kernels are tabulated, we exclude the time taken for this function from our overall timing results.
-  compact_oversample_wkernels(num_w_planes, support, oversample, conv_size_half, conv_func, compacted_wkernels, compacted_wkernel_start);
+  //compact_oversample_wkernels(num_w_planes, support, oversample, conv_size_half, conv_func, compacted_wkernels, compacted_wkernel_start);
+
+  rearrange_kernels(num_w_planes, support, oversample, conv_size_half, conv_func, compacted_wkernels, compacted_wkernel_start);
+
 
   //time2 = omp_get_wtime() - time1;
   //printf("Compacting time: %fms\n",time2*1000);
@@ -1184,8 +1188,8 @@ printf("num_vis: %d\n", num_vis);
     static cl_platform_id platform = NULL;
     static cl_device_id device = NULL;
     static cl_context context = NULL;
-    static cl_command_queue queue = NULL;
-    static cl_kernel kernel = NULL;
+    static cl_command_queue queue_main_small = NULL, queue_main_large = NULL, queue_small = NULL, queue_large = NULL;
+    static cl_kernel kernel_main_small = NULL, kernel_main_large = NULL, kernel_small= NULL, kernel_large = NULL;
     static cl_program program = NULL;
 
     cl_int status;
@@ -1224,6 +1228,8 @@ printf("num_vis: %d\n", num_vis);
     free(value);
     context = clCreateContext( NULL, 1, &device, NULL, NULL, &status);
     queue = clCreateCommandQueue(context, device, 0, &status);
+    queue_small = clCreateCommandQueue(context, device, 0, &status);
+    queue_large = clCreateCommandQueue(context, device, 0, &status);
 
     cl_uint param_value;
     clGetDeviceInfo(device, CL_DEVICE_MAX_CONSTANT_ARGS, sizeof(cl_uint), &param_value, NULL);
@@ -1345,35 +1351,65 @@ printf("num_vis: %d\n", num_vis);
     printf("kernel compile error log: %s\n", buffer);
 
 
-    kernel = clCreateKernel(program, "oskar_process_all_tiles", &status);
+    kernel_main_small = clCreateKernel(program, "oskar_process_all_small_tiles", &status);
 
     int arg=0;
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_num_w_planes);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_support);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_oversample);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_compact_kernels_start);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_compact_kernels);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_cell_size_rad);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_float), (void *)&d_w_scale);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_grid_size);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_boxTop_u);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_boxTop_v);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_tileWidth);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_tileHeight);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_numTiles_u);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_numTiles_v);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_numPointsInTiles);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_offsetsPointsInTiles);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_tileHasLargeWSupport);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_int), (void *)&d_numTilesWithLargeWSupport);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_uu);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_vv);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_ww);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_bucket_vis);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pu);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pv);
-    status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), &d_num_w_planes);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_support);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_oversample);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_compact_kernels_start);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_compact_kernels);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_float), (void *)&d_cell_size_rad);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_float), (void *)&d_w_scale);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_grid_size);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_boxTop_u);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_boxTop_v);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_tileWidth);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_tileHeight);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_numTiles_u);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_numTiles_v);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_numPointsInTiles);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_offsetsPointsInTiles);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_tileHasLargeWSupport);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_int), (void *)&d_numTilesWithLargeWSupport);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_bucket_uu);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_bucket_vv);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_bucket_ww);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_bucket_vis);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_workQueue_pu);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_workQueue_pv);
+    status = clSetKernelArg(kernel_main_small, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
+
+    kernel_main_large = clCreateKernel(program, "oskar_process_all_large_tiles", &status);
+
+    int arg=0;
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), &d_num_w_planes);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_support);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_oversample);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_compact_kernels_start);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_compact_kernels);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_float), (void *)&d_cell_size_rad);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_float), (void *)&d_w_scale);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_trimmed_grid_size);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_grid_size);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_boxTop_u);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_boxTop_v);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_tileWidth);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_tileHeight);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_numTiles_u);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_numTiles_v);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_numPointsInTiles);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_offsetsPointsInTiles);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_tileHasLargeWSupport);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_int), (void *)&d_numTilesWithLargeWSupport);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_bucket_uu);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_bucket_vv);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_bucket_ww);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_bucket_vis);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_workQueue_pu);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_workQueue_pv);
+    status = clSetKernelArg(kernel_main_large, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
 
 /*
     kernelLarge = clCreateKernel(program, "process_large_wsupport", &status);
@@ -1399,6 +1435,9 @@ int arg=0;
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
 */
 
+    kernel_small = clCreateKernel(program, "convEngSmall", &status);
+    kernel_large = clCreateKernel(program, "convEngLarge", &status);
+
     printf("finished init opencl\n");
     /*===================================================================*/
     /* End init OpenCL */
@@ -1418,7 +1457,10 @@ int arg=0;
 
         auto start = std::chrono::high_resolution_clock::now();
 
-        status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
+        status = clEnqueueTask(queue_main_small, kernel_main_small, 0, NULL, NULL);
+        status = clEnqueueTask(queue_main_large, kernel_main_large, 0, NULL, NULL);
+        status = clEnqueueTask(queue_small, kernel_small, 0, NULL, NULL);
+        status = clEnqueueTask(queue_large, kernel_large, 0, NULL, NULL);
         status = clFinish(queue);
 
         auto stop = std::chrono::high_resolution_clock::now();

@@ -1,5 +1,8 @@
 #pragma OPENCL EXTENSION cl_altera_channels : enable  //you need this
 
+
+#define MAX_W_SUPPORT 72
+
 struct ChDataConvEngConfig{       // Fix -- might want to send these through per vis, instead of grid_w
     __global const float2* restrict compact_wkernel;
     int tileHeight, tileWidth;
@@ -14,7 +17,7 @@ struct ChDataTileConfig {
 
 struct ChDataVis {
     int compact_start_index, index_in_compact_kernel, grid_local_u, grid_local_v;
-    int u_fac, v_fac;
+    int k_stride, off_v, oversample;
     int jstart, jend, kstart, kend;
     int wsupport;
     float conv_mul;
@@ -25,7 +28,7 @@ struct ChDataVis {
 
 struct ChDataVisLarge {
     int compact_start_index, grid_local_u, grid_local_v;
-    int u_fac, v_fac;
+    int k_stride, off_v, oversample;
     int jstart, jend, kstart, kend;
     int wsupport;
     float conv_mul;
@@ -44,7 +47,7 @@ channel uchar chConvEngFinishedLarge __attribute__((depth(1)));
 
 
 __attribute__((max_global_work_dim(0)))
-__kernel void oskar_process_all_tiles(
+__kernel void oskar_process_all_small_tiles(
        int num_w_planes,
        __global const int* restrict support,
        int oversample, 
@@ -96,7 +99,7 @@ __kernel void oskar_process_all_tiles(
     conv_eng_config.tileWidth = tileWidth;
     conv_eng_config.trimmed_grid_size = trimmed_grid_size;
     write_channel_intel(chConvEngConfig, conv_eng_config);
-    write_channel_intel(chConvEngConfigLarge, conv_eng_config);
+    //write_channel_intel(chConvEngConfigLarge, conv_eng_config);
     //printf("sent conv eng config\n");
 
     int nTilesSmall=nTiles-numTilesWithLargeWSupport;
@@ -125,6 +128,9 @@ __kernel void oskar_process_all_tiles(
         tile_config.is_final = 0;
 
         if (!(TILE_HAS_LARGE_W_SUPPORT(pu,pv))){
+
+            // SMALL KERNELS
+
             //printf("small count=%d\n", countTilesSmall);
             if (countTilesSmall==nTilesSmall-1) {
                 tile_config.is_final = 1;
@@ -134,7 +140,7 @@ __kernel void oskar_process_all_tiles(
             }
             countTilesSmall++;
             write_channel_intel(chTileConfig, tile_config);
-            //printf("sent tile config %d num vis %d is final %d\n", tile, tile_config.num_tile_vis, tile_config.is_final);
+            //printf("sent small tile config %d num vis %d is final %d\n", tile, tile_config.num_tile_vis, tile_config.is_final);
 
             int grid_w_prev = -1; 
             // Loop over visibilities in the Tile.
@@ -183,37 +189,135 @@ __kernel void oskar_process_all_tiles(
                 const int jstart = MAX(tile_v[0]-grid_v, -wsupport);
                 const int jend   = MIN(tile_v[1]-grid_v,  wsupport);
 
-                int u_fac = 0, v_fac = 0;
-                if (off_u >= 0) u_fac = 1;
-                if (off_u < 0) u_fac = -1;
-                if (off_v >= 0) v_fac = 1;
-                if (off_v < 0) v_fac = -1;
-
                 struct ChDataVis vis;
 
-                vis.index_in_compact_kernel = abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + wsupport*(2*wsupport + 1) + wsupport; 
-                vis.compact_start_index = compact_start;
-                vis.conv_kernel_size = (oversample-1)*(2*wsupport+1)*(2*wsupport+1)*(oversample/2+2) + (2*wsupport)*(2*wsupport+2);
+                vis.conv_kernel_size = (oversample/2+1)*(2*wsupport+1)*(2*wsupport+1)*(oversample/2+2) + (2*wsupport)*(2*wsupport+2);
 
+                int conv_len = 2*wsupport + 1;
+                int width = (oversample/2 * conv_len + 1) * conv_len;
+                vis.conv_kernel_size = width*(oversample/2+1);
+                int mid = (abs(off_u) + 1) * width - 1 - wsupport;
+                vis.index_in_compact_kernel = mid; 
+                vis.compact_start_index = compact_start; 
                 vis.grid_local_u = grid_local_u;
                 vis.grid_local_v = grid_local_v;
-                vis.u_fac = u_fac;
-                vis.v_fac = v_fac;
-                vis.jstart = jstart;
-                vis.jend = jend;
+                vis.k_stride = off_u >= 0 ? 1 : -1;
                 vis.kstart = kstart;
                 vis.kend = kend;
+                vis.off_v = off_v;
+                vis.jstart = jstart;
+                vis.jend = jend;
+                vis.oversample = oversample;
+
                 vis.wsupport = wsupport;
                 vis.conv_mul = (float) conv_mul; 
                 vis.val = val;
                 vis.load_new_conv_kernel = (grid_w==grid_w_prev ? 0 : 1);
                 grid_w_prev = grid_w;
 
+                //printf("sent vis at kstart: %d\n", vis.kstart);
                 write_channel_intel(chVis, vis);
                 
             } // END loop over vis in tile
             //printf("finished tile %d\n", countTilesSmall);
-        } else {
+        } 
+    } // END loop over tiles
+
+    uchar finished = read_channel_intel(chConvEngFinished);
+    //printf("finished: %u\n", finished);
+
+
+#undef NUM_POINTS_IN_TILES
+#undef OFFSETS_IN_TILES
+
+#endif
+}
+
+__attribute__((max_global_work_dim(0)))
+__kernel void oskar_process_all_large_tiles(
+       int num_w_planes,
+       __global const int* restrict support,
+       int oversample, 
+       __global const int* restrict compact_wkernel_start, 
+       __global const float2* restrict compact_wkernel,
+       float cell_size_rad,
+       float w_scale,
+       int trimmed_grid_size,
+       int grid_size,
+       int boxTop_u, int boxTop_v,
+       int tileWidth, //
+       int tileHeight,
+       int numTiles_u, int numTiles_v,
+       __global const int* restrict numPointsInTiles,
+       __global const int* restrict offsetsPointsInTiles,
+       __global int* restrict tileHasLargeWSupport,
+       int numTilesWithLargeWSupport,
+       __global float* restrict bucket_uu,
+       __global float* restrict bucket_vv,
+       __global float* restrict bucket_ww,
+       __global float2* restrict bucket_vis,
+       __global int * restrict workQueue_pu, 
+       __global int * restrict workQueue_pv,
+       __global float* restrict grid
+       )
+{
+#if 1
+    const int g_centre = grid_size / 2;
+    const double scale = grid_size * cell_size_rad;
+
+    const int nTiles = numTiles_u * numTiles_v;
+    //const int nTiles = 623;
+    //printf("nTiles = %d\n", nTiles);
+    //const int nTiles = 1;
+
+    double norm = 0.0;
+    int num_skipped = 0;
+
+    #define NUM_POINTS_IN_TILES(uu, vv)  numPointsInTiles[( (uu) + (vv)*numTiles_u)]
+    #define OFFSETS_IN_TILES(uu, vv)     offsetsPointsInTiles[( (uu) + (vv)*numTiles_u)]
+    #define TILE_HAS_LARGE_W_SUPPORT(uu, vv)  tileHasLargeWSupport[( (uu) + (vv)*numTiles_u )]
+
+    #define MAX( A, B ) ( (A) > (B) ? (A) : (B) )
+    #define MIN( A, B ) ( (A) < (B) ? (A) : (B) )
+
+    struct ChDataConvEngConfig conv_eng_config;
+    conv_eng_config.compact_wkernel = compact_wkernel;
+    conv_eng_config.tileHeight = tileHeight;
+    conv_eng_config.tileWidth = tileWidth;
+    conv_eng_config.trimmed_grid_size = trimmed_grid_size;
+    //write_channel_intel(chConvEngConfig, conv_eng_config);
+    write_channel_intel(chConvEngConfigLarge, conv_eng_config);
+    //printf("sent conv eng config\n");
+
+    int nTilesSmall=nTiles-numTilesWithLargeWSupport;
+    int nTilesLarge=numTilesWithLargeWSupport;
+    int countTilesSmall=0, countTilesLarge=0;
+    //printf("small: %d, large: %d, total: %d\n", nTilesSmall, nTilesLarge, nTiles);
+    
+    // Loop over the Tiles.
+    for (int tile=0; tile<nTiles; tile++)
+    {
+        //printf("beginning of tile\n");
+		// Get some information about this Tile.
+		int pu = workQueue_pu[tile];
+		int pv = workQueue_pv[tile];
+
+        const int off = OFFSETS_IN_TILES(pu, pv);
+		const int num_tile_vis = NUM_POINTS_IN_TILES(pu,pv);
+
+        int tileTopLeft_u = pu*tileWidth;
+        int tileTopLeft_v = pv*tileHeight;
+        int tileOffset = tileTopLeft_v*trimmed_grid_size + tileTopLeft_u;
+
+        struct ChDataTileConfig tile_config;
+        tile_config.grid_pointer = (__global float2 *restrict)&grid[tileOffset*2];
+        tile_config.num_tile_vis = num_tile_vis;
+        tile_config.is_final = 0;
+
+        if (TILE_HAS_LARGE_W_SUPPORT(pu,pv)){
+
+            // LARGE KERNELS
+
             //printf("large count=%d\n", countTilesLarge);
             if (countTilesLarge==nTilesLarge-1) {
                 tile_config.is_final = 1;
@@ -223,7 +327,7 @@ __kernel void oskar_process_all_tiles(
             }
             countTilesLarge++;
 			write_channel_intel(chTileConfigLarge, tile_config);
-			//printf("sent tile config %d num vis %d is final %d\n", tile, tile_config.num_tile_vis, tile_config.is_final);
+			//printf("sent large tile config %d num vis %d is final %d\n", tile, tile_config.num_tile_vis, tile_config.is_final);
 
 			// Loop over visibilities in the Tile.
 			for (int i = 0; i < num_tile_vis; i++)
@@ -249,8 +353,6 @@ __kernel void oskar_process_all_tiles(
 				// Scaled distance from nearest grid point.
 				const int off_u = (int)round( (round(pos_u)-pos_u) * oversample);   // \in [-oversample/2, oversample/2]
 				const int off_v = (int)round( (round(pos_v)-pos_v) * oversample);    // \in [-oversample/2, oversample/2]
-
-
 				const int compact_start = compact_wkernel_start[grid_w];
 
 				int conv_mul = (ww_i > 0 ? -1 : 1);
@@ -271,35 +373,53 @@ __kernel void oskar_process_all_tiles(
 				const int jstart = MAX(tile_v[0]-grid_v, -wsupport);
 				const int jend   = MIN(tile_v[1]-grid_v,  wsupport);
 
-				int u_fac = 0, v_fac = 0;
-				if (off_u >= 0) u_fac = 1;
-				if (off_u < 0) u_fac = -1;
-				if (off_v >= 0) v_fac = 1;
-				if (off_v < 0) v_fac = -1;
-
 				struct ChDataVisLarge visLarge;
-				visLarge.compact_start_index = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + wsupport*(2*wsupport + 1) + wsupport; 
-				visLarge.grid_local_u = grid_local_u;
-				visLarge.grid_local_v = grid_local_v;
-				visLarge.u_fac = u_fac;
-				visLarge.v_fac = v_fac;
-				visLarge.jstart = jstart;
-				visLarge.jend = jend;
-				visLarge.kstart = kstart;
-				visLarge.kend = kend;
-				visLarge.wsupport = wsupport;
-				visLarge.conv_mul = (float) conv_mul; 
-				visLarge.val = val;
 
-				write_channel_intel(chVisLarge, visLarge);
-				
+                int conv_len = 2*wsupport + 1;
+                int width = (oversample/2 * conv_len + 1) * conv_len;
+                int mid = (abs(off_u) + 1) * width - 1 - wsupport;
+                visLarge.compact_start_index = compact_start + mid; 
+                visLarge.grid_local_u = grid_local_u;
+                visLarge.grid_local_v = grid_local_v;
+                visLarge.k_stride = off_u >= 0 ? 1 : -1;
+                visLarge.off_v = off_v;
+
+                int reverse_k = (off_u < 0);
+                //visLarge.kstart = kstart;
+                //visLarge.kend = kend;
+
+                if (reverse_k){
+                    visLarge.kstart = MAX_W_SUPPORT-kend + reverse_k*(2*MAX_W_SUPPORT+1);
+                } else {
+                    visLarge.kstart = kstart + MAX_W_SUPPORT;
+                }
+                visLarge.kend = visLarge.kstart + (kend-kstart);
+
+
+                visLarge.jstart = jstart;
+                visLarge.jend = jend;
+                visLarge.oversample = oversample;
+/*
+                if (reverse_k){
+                    visLarge.kstart = MAX_W_SUPPORT-kend + reverse_k*(2*MAX_W_SUPPORT+1);
+                } else {
+                    visLarge.kstart = kstart + MAX_W_SUPPORT;
+                }
+                visLarge.kend = visLarge.kstart + (kend-kstart);
+*/
+
+                visLarge.wsupport = wsupport;
+                visLarge.conv_mul = (float) conv_mul; 
+                visLarge.val = val;
+
+                write_channel_intel(chVisLarge, visLarge);
+
 			} // END loop over vis in tile
         }
 
     } // END loop over tiles
 
-    uchar finished = read_channel_intel(chConvEngFinished);
-    finished = read_channel_intel(chConvEngFinishedLarge);
+    uchar finished = read_channel_intel(chConvEngFinishedLarge);
     //printf("finished: %u\n", finished);
 
 
@@ -310,9 +430,8 @@ __kernel void oskar_process_all_tiles(
 }
 
 __attribute__((max_global_work_dim(0)))
-__attribute__((autorun))
 __attribute__((num_compute_units(1)))
-__kernel void convEng()
+__kernel void convEngSmall()
 {
 
 #if 1
@@ -329,9 +448,15 @@ __kernel void convEng()
     // initial version -- (oversample/2 + wsupport*oversample + 1)^2
     //#define MAX_CONV_KERNEL_SIZE 84681
 
-    // further compacted version -- (oversample-1)*(2*wsupport+1)^2 * (oversample/2 + 2) + (2*wsupport)*(2*wsupport+2)
-    //#define MAX_CONV_KERNEL_SIZE 273324
-    #define MAX_CONV_KERNEL_SIZE 21852
+    // further compacted version -- (oversample/2+1)*(2*wsupport+1)^2 * (oversample/2 + 2) + (2*wsupport)*(2*wsupport+2)
+    //#define MAX_CONV_KERNEL_SIZE 21852 // wsupportMax = 20
+    //#define MAX_CONV_KERNEL_SIZE 33812 // wsupportMax = 25
+    //#define MAX_CONV_KERNEL_SIZE 48372 // wsupportMax = 30
+    //#define MAX_CONV_KERNEL_SIZE 85292 // wsupportMax = 40
+
+    // Fred kernels -- ((oversample/2 * conv_len + 1) * conv_len) * (oversample/2+1)
+    #define MAX_CONV_KERNEL_SIZE 22509 // wsupportMax = 30
+
 
     float2 grid_local[MAX_TILE_WIDTH][MAX_TILE_HEIGHT];
     float2 conv_kernel_local[MAX_CONV_KERNEL_SIZE];
@@ -353,7 +478,7 @@ __kernel void convEng()
         if (final_iter ==1){
             tile_config = read_channel_intel(chTileConfig); 
         }
-        //printf("received tile config. numVis: %d\n", tile_config.num_tile_vis);
+        //printf("small received tile config. numVis: %d\n", tile_config.num_tile_vis);
         // Copy global grid to grid_local
         for (int y=0; y<tileHeight; y++){
             for (int x=0; x<tileWidth; x++){
@@ -386,7 +511,8 @@ __kernel void convEng()
                 #pragma ivdep
                 for (int k = vis.kstart; k <= vis.kend; ++k)
                 {
-                    int p = vis.index_in_compact_kernel + j*vis.v_fac*(2*vis.wsupport+1) + k*vis.u_fac;
+                    int p = vis.index_in_compact_kernel - abs(vis.off_v + j*vis.oversample)*(2*vis.wsupport+1) +
+                            k*vis.k_stride;
 
                     float2 c = conv_kernel_local[p];
                     c.y *= vis.conv_mul;
@@ -394,9 +520,6 @@ __kernel void convEng()
                     // Real part only.
                     sum += c.x;
 
-                    //p = ((grid_v + j) * trimmed_grid_size) + grid_u + k;
-                    //grid[2*p]     += (vis.val.x * c.x - vis.val.y * c.y);
-                    //grid[2*p + 1] += (vis.val.y * c.x + vis.val.x * c.y);
                     grid_local[vis.grid_local_v + j][vis.grid_local_u + k] +=
                         (float2) ((vis.val.x * c.x - vis.val.y * c.y), (vis.val.y * c.x + vis.val.x * c.y));
                 }
@@ -418,6 +541,7 @@ __kernel void convEng()
 
         if (tile_config.is_final==1) {
             write_channel_intel(chConvEngFinished, tile_config.is_final);
+            break;
         }
     } // END loop over tiles
 
@@ -426,7 +550,6 @@ __kernel void convEng()
 }
 
 __attribute__((max_global_work_dim(0)))
-__attribute__((autorun))
 __attribute__((num_compute_units(1)))
 __kernel void convEngLarge()
 {
@@ -451,6 +574,15 @@ __kernel void convEngLarge()
     int trimmed_grid_size = conv_eng_config.trimmed_grid_size;
     __global float2* restrict compact_wkernel = (__global float2* restrict)conv_eng_config.compact_wkernel;
 
+    int k_indices_local[2*(2*MAX_W_SUPPORT+1)];
+    int numIndices = 2*MAX_W_SUPPORT+1; 
+    for (int i=0; i<numIndices; i++){
+        k_indices_local[i] = -MAX_W_SUPPORT + i;
+    }
+    for (int i=0; i<numIndices; i++){
+        k_indices_local[i+numIndices] =  MAX_W_SUPPORT - i;
+    }
+
     
     int count=0;
     while(1){
@@ -460,7 +592,7 @@ __kernel void convEngLarge()
         if (final_iter ==1){
             tile_config = read_channel_intel(chTileConfigLarge); 
         }
-        //printf("received tile config. numVis: %d\n", tile_config.num_tile_vis);
+        //printf(" large received tile config. numVis: %d\n", tile_config.num_tile_vis);
         // Copy global grid to grid_local
         __global float2 *restrict grid_pointer;
         for (int y=0; y<tileHeight; y++){
@@ -488,9 +620,11 @@ __kernel void convEngLarge()
                   // as threads don't access overlapping grid regions.
                   // So we have to tell the compiler explicitly to vectorise.
                 #pragma ivdep
-                for (int k = vis.kstart; k <= vis.kend; ++k)
+                for (int kindex = vis.kstart; kindex <= vis.kend; ++kindex)
                 {
-                    int p = vis.compact_start_index + j*vis.v_fac*(2*vis.wsupport+1) + k*vis.u_fac;
+                    int k = k_indices_local[kindex];
+                    int p = vis.compact_start_index - abs(vis.off_v + j*vis.oversample)*(2*vis.wsupport+1) +
+                            k*vis.k_stride;
 
                     float2 c = compact_wkernel[p];
                     c.y *= vis.conv_mul;
@@ -498,9 +632,6 @@ __kernel void convEngLarge()
                     // Real part only.
                     sum += c.x;
 
-                    //p = ((grid_v + j) * trimmed_grid_size) + grid_u + k;
-                    //grid[2*p]     += (vis.val.x * c.x - vis.val.y * c.y);
-                    //grid[2*p + 1] += (vis.val.y * c.x + vis.val.x * c.y);
                     grid_local[vis.grid_local_v + j][vis.grid_local_u + k] +=
                         (float2) ((vis.val.x * c.x - vis.val.y * c.y), (vis.val.y * c.x + vis.val.x * c.y));
                 }
@@ -523,6 +654,7 @@ __kernel void convEngLarge()
 
         if (tile_config.is_final==1) {
             write_channel_intel(chConvEngFinishedLarge, tile_config.is_final);
+            break;
         }
     } // END loop over tiles
 

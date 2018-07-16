@@ -274,8 +274,8 @@ int main(int argc, char** argv)
                 INT*6, dim_start_and_size, &status);
         const int num_times = dim_start_and_size[2];
         int block_size = num_times * num_baselines;
-        int num_vis_processed = num_times * num_baselines;
-        //int num_vis_processed = 100000;
+        //int num_vis_processed = num_times * num_baselines;
+        int num_vis_processed = 10000;
 
         /* Read the visibility data. */
         oskar_binary_read(h, vis_type,
