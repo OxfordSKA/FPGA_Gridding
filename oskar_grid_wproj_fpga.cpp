@@ -809,7 +809,9 @@ printf("num_vis: %d\n", num_vis);
     static cl_device_id device = NULL;
     static cl_context context = NULL;
     static cl_command_queue queue = NULL;
+    static cl_command_queue queue_conv = NULL;
     static cl_kernel kernel = NULL;
+    static cl_kernel kernel_conv = NULL;
     static cl_program program = NULL;
 
     cl_int status;
@@ -848,6 +850,7 @@ printf("num_vis: %d\n", num_vis);
     free(value);
     context = clCreateContext( NULL, 1, &device, NULL, NULL, &status);
     queue = clCreateCommandQueue(context, device, 0, &status);
+    queue_conv = clCreateCommandQueue(context, device, 0, &status);
 
     cl_uint param_value;
     clGetDeviceInfo(device, CL_DEVICE_MAX_CONSTANT_ARGS, sizeof(cl_uint), &param_value, NULL);
@@ -963,6 +966,7 @@ printf("num_vis: %d\n", num_vis);
 
 
     kernel = clCreateKernel(program, "oskar_process_all_tiles", &status);
+    printf("status: %d\n", status);
 
     int arg=0;
     status = clSetKernelArg(kernel, arg++, sizeof(cl_int), &d_num_w_planes);
@@ -990,6 +994,9 @@ printf("num_vis: %d\n", num_vis);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_workQueue_pv);
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
 
+    kernel_conv = clCreateKernel(program, "convEng", &status);
+    printf("status: %d\n", status);
+
     printf("finished init opencl\n");
     /*===================================================================*/
     /* End init OpenCL */
@@ -1009,6 +1016,7 @@ printf("num_vis: %d\n", num_vis);
 
         auto start = std::chrono::high_resolution_clock::now();
 
+        status = clEnqueueTask(queue_conv, kernel_conv, 0, NULL, NULL);
         status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
         status = clFinish(queue);
 
