@@ -149,7 +149,11 @@ int pu = workQueue_pu[tile];
         {
           int p = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + (j*v_fac + wsupport)*(2*wsupport + 1) + k*u_fac + wsupport;
          
-          float2 c = compact_wkernel[p];
+          //float2 c = compact_wkernel[p];
+          float2 c;
+          //c.x=1; c.y=1;
+          //val.x=1; val.y=1;
+
           c.y *= conv_mul;
 
           // Real part only.
@@ -158,6 +162,8 @@ int pu = workQueue_pu[tile];
           p = ((grid_v + j) * grid_size) + grid_u + k;
           grid[2*p]     += (val.x * c.x - val.y * c.y);
           grid[2*p + 1] += (val.y * c.x + val.x * c.y);
+          //grid[2*p]     = 0;
+          //grid[2*p + 1] = 0;
         }
         }
       local_norm += sum * w;

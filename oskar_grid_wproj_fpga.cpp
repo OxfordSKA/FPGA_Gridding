@@ -692,6 +692,8 @@ printf("num_vis: %d\n", num_vis);
   //printf("Finding grid hit box time: %fms\n",time4*1000);
 
   int len_u = int( (botRight.u - topLeft.u) );
+    printf("botRight: %d %d\n", botRight.u, botRight.v);
+    printf("topLeft: %d %d\n", topLeft.u, topLeft.v);
   int len_v = int( (botRight.v - topLeft.v) );
   Point boxTop( topLeft.u, topLeft.v);
   Point boxBot( botRight.u, botRight.v);
