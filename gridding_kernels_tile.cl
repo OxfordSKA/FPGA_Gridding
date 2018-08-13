@@ -45,8 +45,6 @@ __kernel void oskar_process_all_tiles(
 #define MAX_TILE_WIDTH 64
 #define MAX_TILE_HEIGHT 64
 
-float2 grid_local[MAX_TILE_WIDTH][MAX_TILE_HEIGHT];
-
   // Loop over the Tiles.
 #pragma omp parallel for default(shared) reduction(+:local_norm) schedule(static, 1)
   for (int tile=0; tile<nTiles; tile++)
@@ -59,15 +57,7 @@ float2 grid_local[MAX_TILE_WIDTH][MAX_TILE_HEIGHT];
         int tileTopLeft_v = pv*tileHeight;
         int tileOffset = tileTopLeft_v*trimmed_grid_size + tileTopLeft_u;
         //printf("pu: %d, pv: %d, tileOffset: %d\n", pu, pv, tileOffset);
-        __global float2 *restrict grid_pointer;
-        grid_pointer = (__global float2 *restrict)grid;
-        for (int y=0; y<tileHeight; y++){
-            for (int x=0; x<tileWidth; x++){
-                grid_pointer = (__global float2 *restrict)&grid[(tileOffset + y*trimmed_grid_size + x)*2];
-                grid_local[y][x] = *grid_pointer;
-            }
-        }
-
+  
 		const int off = OFFSETS_IN_TILES(pu, pv);
 		const int num_tile_vis = NUM_POINTS_IN_TILES(pu,pv);
 
@@ -92,15 +82,8 @@ float2 grid_local[MAX_TILE_WIDTH][MAX_TILE_HEIGHT];
 			if(grid_w >= num_w_planes) grid_w = num_w_planes - 1;
 
 			const int wsupport = support[grid_w];
-/*
-			if (grid_u + wsupport >= trimmed_grid_size || grid_u - wsupport < 0 ||
-					grid_v + wsupport >= trimmed_grid_size || grid_v - wsupport < 0)
-			{
-				num_skipped += 1;
-				continue; //TODO: Is this the best way to break the rest of loop?
-			}        
-*/
-			// Scaled distance from nearest grid point.
+			
+            // Scaled distance from nearest grid point.
 			const int off_u = (int)round( (round(pos_u)-pos_u) * oversample);   // \in [-oversample/2, oversample/2]
 			const int off_v = (int)round( (round(pos_v)-pos_v) * oversample);    // \in [-oversample/2, oversample/2]
 
@@ -138,7 +121,6 @@ float2 grid_local[MAX_TILE_WIDTH][MAX_TILE_HEIGHT];
 				  // Compiler assumes there's a dependency but there isn't
 				  // as threads don't access overlapping grid regions.
 				  // So we have to tell the compiler explicitly to vectorise.
-				#pragma omp simd
 				for (int k = kstart; k <= kend; ++k)
 				{
 					int p = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + (j*v_fac + wsupport)*(2*wsupport + 1) + k*u_fac + wsupport;
@@ -149,26 +131,17 @@ float2 grid_local[MAX_TILE_WIDTH][MAX_TILE_HEIGHT];
 					// Real part only.
 					sum += c.x;
 
-					//p = ((grid_v + j) * trimmed_grid_size) + grid_u + k;
-					//grid[2*p]     += (val.x * c.x - val.y * c.y);
-					//grid[2*p + 1] += (val.y * c.x + val.x * c.y);
-                    grid_local[grid_local_v + j][grid_local_u + k] +=
-                        (float2) ((val.x * c.x - val.y * c.y), (val.y * c.x + val.x * c.y));
+					p = ((grid_v + j) * trimmed_grid_size) + grid_u + k;
+					grid[2*p]     += (val.x * c.x - val.y * c.y);
+					grid[2*p + 1] += (val.y * c.x + val.x * c.y);
+                    //grid_local[grid_local_v + j][grid_local_u + k] +=
+                     //   (float2) ((val.x * c.x - val.y * c.y), (val.y * c.x + val.x * c.y));
 				}
 			}
 			norm += sum * w;
 
             
 		} // END loop over vis in tile
-
-        // put the grid back
-        for (int y=0; y<tileHeight; y++){
-            for (int x=0; x<tileWidth; x++){
-                grid_pointer = (__global float2 *restrict)&grid[(tileOffset + y*trimmed_grid_size + x)*2];
-                *grid_pointer = grid_local[y][x];
-            }
-        }
-     
 
     } // END loop over tiles
 

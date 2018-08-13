@@ -3,6 +3,6 @@
 {"name":"Target Family, Device, Board","data":["Arria 10, 10AX115S2F45I2SGES, a10_ref:a10gx"]},
 {"name":"AOC Version","data":["17.1.1 Build 273"]},
 {"name":"Quartus Version","data":["17.1.1 Build 273"]},
-{"name":"Command","data":["aoc gridding_kernels_tile.cl -v"]},
-{"name":"Reports Generated At", "data":["Fri May  4 10:38:50 2018"]}
+{"name":"Command","data":["aoc -v gridding_kernels_tile.cl"]},
+{"name":"Reports Generated At", "data":["Mon Aug 13 11:50:38 2018"]}
 ]}
