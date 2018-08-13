@@ -108,6 +108,7 @@ __kernel void oskar_grid_wproj_cl(
 		}
 		
         /* Convolve this point onto the grid. */
+        #pragma ivdep
         for (j = -w_support; j <= w_support; ++j) // maximum -70,70
         {
             int p1, t1;
@@ -117,6 +118,7 @@ __kernel void oskar_grid_wproj_cl(
             t1 = abs(off_v + j * oversample);
             t1 *= conv_size_half;
             t1 += kernel_start;
+            #pragma ivdep
             for (k = -w_support; k <= w_support; ++k)  //maximum -70, 70
             {
                 int p = (t1 + abs(off_u + k * oversample)) << 1;
