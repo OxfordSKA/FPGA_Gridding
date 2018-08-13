@@ -115,12 +115,14 @@ __kernel void oskar_process_all_tiles(
 			if (off_u < 0) u_fac = -1;
 			if (off_v >= 0) v_fac = 1;
 			if (off_v < 0) v_fac = -1;
-        
+       
+            #pragma ivdep 
 			for (int j = jstart; j <= jend; ++j)
 			{
 				  // Compiler assumes there's a dependency but there isn't
 				  // as threads don't access overlapping grid regions.
 				  // So we have to tell the compiler explicitly to vectorise.
+                #pragma ivdep 
 				for (int k = kstart; k <= kend; ++k)
 				{
 					int p = compact_start + abs(off_v)*(oversample/2 + 1)*(2*wsupport + 1)*(2*wsupport + 1)  + abs(off_u)*(2*wsupport + 1)*(2*wsupport + 1)  + (j*v_fac + wsupport)*(2*wsupport + 1) + k*u_fac + wsupport;
