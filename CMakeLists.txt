@@ -63,6 +63,7 @@ set(read_vis_SRC
     utils/read_kernel.c
     utils/read_vis.c
     utils/write_fits_cube.c
+    rearrange_kernels.cpp
     oskar_grid_wproj.c
     oskar_grid_wproj_fpga.cpp
     oskar_grid_wproj_cpu.cpp

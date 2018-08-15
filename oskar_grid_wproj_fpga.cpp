@@ -25,8 +25,9 @@
 #endif
 
 #include "oskar_grid_wproj_fpga.hpp"
+#include "rearrange_kernels.hpp"
 
-#define MAX_W_SUPPORT_LOCAL 20
+#define MAX_W_SUPPORT_LOCAL 25
 
 using namespace aocl_utils;
 
@@ -162,7 +163,7 @@ void oskar_count_elements_in_tiles_layered_split(
 
       // Catch points that would lie outside the grid.
       const int wsupport = support[grid_w];
-      if (wsupport > 20){
+      if (wsupport > MAX_W_SUPPORT_LOCAL){
             numPointsWithLargeWsupportLocal++;
             continue;
       } 
@@ -363,7 +364,7 @@ void oskar_bucket_sort_layered_split(
 
       // Catch points that would lie outside the grid.
       const int wsupport = support[grid_w];
-      if (wsupport > 20){
+      if (wsupport > MAX_W_SUPPORT_LOCAL){
 	      // Atomic: get current offset and increment offset by one.
 	      int off;
           #pragma omp atomic capture
@@ -1021,7 +1022,10 @@ printf("num_vis: %d\n", num_vis);
   // First of all, reduce the amount of space that the wkernels occupy and reorder them
   // to be more cache and vectorisation friendly. As this could be done at the point the
   // kernels are tabulated, we exclude the time taken for this function from our overall timing results.
-  compact_oversample_wkernels(num_w_planes, support, oversample, conv_size_half, conv_func, compacted_wkernels, compacted_wkernel_start);
+  //compact_oversample_wkernels(num_w_planes, support, oversample, conv_size_half, conv_func, compacted_wkernels, compacted_wkernel_start);
+
+  rearrange_kernels(num_w_planes, support, oversample, conv_size_half, conv_func, compacted_wkernels, compacted_wkernel_start);
+
 
   //time2 = omp_get_wtime() - time1;
   //printf("Compacting time: %fms\n",time2*1000);
@@ -1184,8 +1188,8 @@ printf("num_vis: %d\n", num_vis);
     static cl_platform_id platform = NULL;
     static cl_device_id device = NULL;
     static cl_context context = NULL;
-    static cl_command_queue queue = NULL;
-    static cl_kernel kernel = NULL;
+    static cl_command_queue queue = NULL, queue_small = NULL, queue_large = NULL;
+    static cl_kernel kernel = NULL, kernel_small= NULL, kernel_large = NULL;
     static cl_program program = NULL;
 
     cl_int status;
@@ -1224,6 +1228,8 @@ printf("num_vis: %d\n", num_vis);
     free(value);
     context = clCreateContext( NULL, 1, &device, NULL, NULL, &status);
     queue = clCreateCommandQueue(context, device, 0, &status);
+    queue_small = clCreateCommandQueue(context, device, 0, &status);
+    queue_large = clCreateCommandQueue(context, device, 0, &status);
 
     cl_uint param_value;
     clGetDeviceInfo(device, CL_DEVICE_MAX_CONSTANT_ARGS, sizeof(cl_uint), &param_value, NULL);
@@ -1399,6 +1405,9 @@ int arg=0;
     status = clSetKernelArg(kernel, arg++, sizeof(cl_mem), (void *)&d_vis_grid_trimmed_new);
 */
 
+    kernel_small = clCreateKernel(program, "convEngSmall", &status);
+    kernel_large = clCreateKernel(program, "convEngLarge", &status);
+
     printf("finished init opencl\n");
     /*===================================================================*/
     /* End init OpenCL */
@@ -1419,6 +1428,8 @@ int arg=0;
         auto start = std::chrono::high_resolution_clock::now();
 
         status = clEnqueueTask(queue, kernel, 0, NULL, NULL);
+        status = clEnqueueTask(queue_small, kernel_small, 0, NULL, NULL);
+        status = clEnqueueTask(queue_large, kernel_large, 0, NULL, NULL);
         status = clFinish(queue);
 
         auto stop = std::chrono::high_resolution_clock::now();
